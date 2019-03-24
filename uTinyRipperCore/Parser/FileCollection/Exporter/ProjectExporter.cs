@@ -168,7 +168,7 @@ namespace uTinyRipper.AssetExporters
 				Object asset = depList[i];
 				if (!queued.Contains(asset))
 				{
-					IExportCollection collection = CreateCollection(virtualFile, asset);
+					IExportCollection collection = CreateCollection(virtualFile, asset, depList);
 					foreach (Object element in collection.Assets)
 					{
 						queued.Add(element);
@@ -255,14 +255,14 @@ namespace uTinyRipper.AssetExporters
 			throw new NotSupportedException($"There is no exporter that know {nameof(AssetType)} for unknown asset '{classID}'");
 		}
 
-		private IExportCollection CreateCollection(VirtualSerializedFile file, Object asset)
+		private IExportCollection CreateCollection(VirtualSerializedFile file, Object asset, List<Object> depList)
 		{
 			Stack<IAssetExporter> exporters = m_exporters[asset.ClassID];
 			foreach (IAssetExporter exporter in exporters)
 			{
 				if (exporter.IsHandle(asset))
 				{
-					return exporter.CreateCollection(file, asset);
+					return exporter.CreateCollection(file, asset, depList);
 				}
 			}
 			throw new Exception($"There is no exporter that can handle '{asset}'");

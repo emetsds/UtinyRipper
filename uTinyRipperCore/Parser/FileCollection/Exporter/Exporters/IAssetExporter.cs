@@ -15,7 +15,7 @@ namespace uTinyRipper.AssetExporters
 		void Export(IExportContainer container, IEnumerable<Object> assets, string path);
 		void Export(IExportContainer container, IEnumerable<Object> assets, string path, Action<IExportContainer, Object, string> callback);
 
-		IExportCollection CreateCollection(VirtualSerializedFile virtualFile, Object asset);
+		IExportCollection CreateCollection(VirtualSerializedFile virtualFile, Object asset, List<Object> depList);
 		AssetType ToExportType(Object asset);
 		bool ToUnknownExportType(ClassIDType classID, out AssetType assetType);
 	}

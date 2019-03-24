@@ -60,7 +60,7 @@ namespace uTinyRipper.AssetExporters
 			throw new NotSupportedException();
 		}
 
-		public IExportCollection CreateCollection(VirtualSerializedFile virtualFile, Object asset)
+		public IExportCollection CreateCollection(VirtualSerializedFile virtualFile, Object asset, List<Object> depList)
 		{
 			if (OcclusionCullingSettings.IsSceneCompatible(asset))
 			{

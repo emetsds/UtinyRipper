@@ -45,7 +45,7 @@ namespace uTinyRipperGUI.Exporters
 			throw new NotSupportedException();
 		}
 
-		public IExportCollection CreateCollection(VirtualSerializedFile virtualFile, Object asset)
+		public IExportCollection CreateCollection(VirtualSerializedFile virtualFile, Object asset, List<Object> depList)
 		{
 			return new AssetExportCollection(this, asset);
 		}

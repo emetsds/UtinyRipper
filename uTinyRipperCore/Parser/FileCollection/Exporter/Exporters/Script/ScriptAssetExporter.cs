@@ -15,7 +15,7 @@ namespace uTinyRipper.AssetExporters
 			return true;
 		}
 
-		public IExportCollection CreateCollection(VirtualSerializedFile virtualFile, Object asset)
+		public IExportCollection CreateCollection(VirtualSerializedFile virtualFile, Object asset, List<Object> depList)
 		{
 			return new ScriptExportCollection(this, (MonoScript)asset);
 		}

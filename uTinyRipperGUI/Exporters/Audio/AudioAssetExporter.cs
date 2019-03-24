@@ -72,7 +72,7 @@ namespace uTinyRipperGUI.Exporters
 			return true;
 		}
 
-		public IExportCollection CreateCollection(VirtualSerializedFile virtualFile, Object asset)
+		public IExportCollection CreateCollection(VirtualSerializedFile virtualFile, Object asset, List<Object> depList)
 		{
 			return new AudioExportCollection(this, (AudioClip)asset);
 		}

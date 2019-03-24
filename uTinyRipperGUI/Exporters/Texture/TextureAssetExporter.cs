@@ -163,16 +163,15 @@ namespace uTinyRipperGUI.Exporters
 			throw new NotSupportedException();
 		}
 
-		public IExportCollection CreateCollection(VirtualSerializedFile virtualFile, Object asset)
-		{
-			if (asset.ClassID == ClassIDType.Sprite)
-			{
-				return TextureExportCollection.CreateExportCollection(this, (Sprite)asset);
-			}
-			return new TextureExportCollection(this, (Texture2D)asset, true);
-		}
-
-		public AssetType ToExportType(Object asset)
+        public IExportCollection CreateCollection(VirtualSerializedFile virtualFile, Object asset, List<Object> depList)
+        {
+            if (asset.ClassID == ClassIDType.Sprite)
+            {
+                return TextureExportCollection.CreateExportCollection(this, (Sprite)asset, depList);
+            }
+            return new TextureExportCollection(this, (Texture2D)asset, true, depList);
+        }
+        public AssetType ToExportType(Object asset)
 		{
 			ToUnknownExportType(asset.ClassID, out AssetType assetType);
 			return assetType;

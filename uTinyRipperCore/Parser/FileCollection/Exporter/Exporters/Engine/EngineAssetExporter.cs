@@ -13,7 +13,7 @@ namespace uTinyRipper.AssetExporters
 			return EngineExportCollection.IsEngineAsset(asset);
 		}
 
-		public IExportCollection CreateCollection(VirtualSerializedFile virtualFile, Object asset)
+		public IExportCollection CreateCollection(VirtualSerializedFile virtualFile, Object asset, List<Object> depList)
 		{
 			return new EngineExportCollection(asset);
 		}

@@ -35,7 +35,7 @@ namespace uTinyRipper.AssetExporters
 		{
 		}
 
-		public IExportCollection CreateCollection(VirtualSerializedFile virtualFile, Object asset)
+		public IExportCollection CreateCollection(VirtualSerializedFile virtualFile, Object asset, List<Object> depList)
 		{
 			if (m_metaTypes.TryGetValue(asset.ClassID, out bool isEmptyCollection))
 			{

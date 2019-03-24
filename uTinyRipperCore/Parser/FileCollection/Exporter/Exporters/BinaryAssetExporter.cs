@@ -39,13 +39,13 @@ namespace uTinyRipper.AssetExporters
 			throw new NotSupportedException();
 		}
 
-		public virtual IExportCollection CreateCollection(VirtualSerializedFile virtualFile, Object asset)
+		public virtual IExportCollection CreateCollection(VirtualSerializedFile virtualFile, Object asset, List<Object> depList)
 		{
 			switch(asset.ClassID)
 			{
 				case ClassIDType.Texture2D:
 				case ClassIDType.Cubemap:
-					return new TextureExportCollection(this, (Texture2D)asset, false);
+					return new TextureExportCollection(this, (Texture2D)asset, false, depList);
 
 				default:
 					return new AssetExportCollection(this, asset);

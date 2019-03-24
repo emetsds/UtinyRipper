@@ -8,7 +8,11 @@ namespace uTinyRipper.AssetExporters
 {
 	public class TextureExportCollection : AssetsExportCollection
 	{
-		public TextureExportCollection(IAssetExporter assetExporter, Texture2D texture, bool convert):
+		public TextureExportCollection(
+            IAssetExporter assetExporter,
+            Texture2D texture,
+            bool convert,
+            List<Object> depList):
 			base(assetExporter, texture, CreateImporter(texture, convert))
 		{
 			m_convert = convert;
@@ -16,7 +20,7 @@ namespace uTinyRipper.AssetExporters
 			{
 				TextureImporter textureImporter = (TextureImporter)MetaImporter;
 				List<Sprite> sprites = new List<Sprite>();
-				foreach (Object asset in texture.File.Collection.FetchAssets())
+				foreach (Object asset in depList)
 				{
 					switch (asset.ClassID)
 					{
@@ -49,18 +53,22 @@ namespace uTinyRipper.AssetExporters
 							break;
 					}
 				}
+                //TODO: sort then call AddAsset for proper ids
 				textureImporter.Sprites = sprites;
 			}
 		}
 
-		public static IExportCollection CreateExportCollection(IAssetExporter assetExporter, Sprite asset)
+		public static IExportCollection CreateExportCollection(
+            IAssetExporter assetExporter,
+            Sprite asset,
+            List<Object> depList)
 		{
 			Texture2D texture = asset.RD.Texture.FindAsset(asset.File);
 			if (texture == null)
 			{
 				return new SkipExportCollection(assetExporter, asset);
 			}
-			return new TextureExportCollection(assetExporter, texture, true);
+			return new TextureExportCollection(assetExporter, texture, true, depList);
 		}
 
 		private static IAssetImporter CreateImporter(Texture2D texture, bool convert)
