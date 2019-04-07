@@ -1,3 +1,5 @@
+using Astc;
+using Pvrtc;
 using System;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -10,6 +12,7 @@ using uTinyRipperGUI.TextureContainers.DDS;
 using uTinyRipperGUI.TextureContainers.KTX;
 using uTinyRipperGUI.TextureContainers.PVR;
 using uTinyRipperGUI.TextureConverters;
+using Yuy2;
 using Version = uTinyRipper.Version;
 
 namespace uTinyRipperGUI.Exporters
@@ -42,7 +45,7 @@ namespace uTinyRipperGUI.Exporters
 		}
 
 
-		public static Bitmap DDSTextureToBitmap(Texture2D texture, byte[] data)
+		public static DirectBitmap DDSTextureToBitmap(Texture2D texture, byte[] data)
 		{
 			DDSContainerParameters @params = new DDSContainerParameters()
 			{
@@ -63,36 +66,36 @@ namespace uTinyRipperGUI.Exporters
 
 			int width = @params.Width;
 			int height = @params.Height;
-			int size = width * height * 4;
-			byte[] buffer = new byte[size];
-			using (MemoryStream destination = new MemoryStream(buffer))
+			DirectBitmap bitmap = new DirectBitmap(width, height);
+			try
 			{
-				using (MemoryStream source = new MemoryStream(data))
+				using (MemoryStream destination = new MemoryStream(bitmap.Bits))
 				{
-					EndianType endianess = Texture2D.IsSwapBytes(texture.File.Platform, texture.TextureFormat) ? EndianType.BigEndian : EndianType.LittleEndian;
-					using (EndianReader sourceReader = new EndianReader(source, endianess))
+					using (MemoryStream source = new MemoryStream(data))
 					{
-						DecompressDDS(sourceReader, destination, @params);
+						EndianType endianess = Texture2D.IsSwapBytes(texture.File.Platform, texture.TextureFormat) ? EndianType.BigEndian : EndianType.LittleEndian;
+						using (EndianReader sourceReader = new EndianReader(source, endianess))
+						{
+							DecompressDDS(sourceReader, destination, @params);
+						}
 					}
+					return bitmap;
 				}
-
-				Bitmap bitmap = new Bitmap(width, height, PixelFormat.Format32bppArgb);
-				Rectangle rect = new Rectangle(0, 0, width, height);
-				BitmapData bitData = bitmap.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
-				IntPtr pointer = bitData.Scan0;
-				Marshal.Copy(buffer, 0, pointer, size);
-				bitmap.UnlockBits(bitData);
-				return bitmap;
+			}
+			catch
+			{
+				bitmap.Dispose();
+				throw;
 			}
 		}
 
-		public static Bitmap DDSCrunchedTextureToBitmap(Texture2D texture, byte[] data)
+		public static DirectBitmap DDSCrunchedTextureToBitmap(Texture2D texture, byte[] data)
 		{
 			byte[] decompressed = DecompressCrunch(texture, data);
 			return DDSTextureToBitmap(texture, decompressed);
 		}
 
-		public static Bitmap PVRTextureToBitmap(Texture2D texture, byte[] data)
+		public static DirectBitmap PVRTextureToBitmap(Texture2D texture, byte[] data)
 		{
 			using (MemoryStream dstStream = new MemoryStream())
 			{
@@ -112,7 +115,7 @@ namespace uTinyRipperGUI.Exporters
 			}
 		}
 
-		public static Bitmap PVRCrunchedTextureToBitmap(Texture2D texture, byte[] data)
+		public static DirectBitmap PVRCrunchedTextureToBitmap(Texture2D texture, byte[] data)
 		{
 			byte[] decompressed = DecompressCrunch(texture, data);
 			using (MemoryStream dstStream = new MemoryStream())
@@ -133,105 +136,122 @@ namespace uTinyRipperGUI.Exporters
 			}
 		}
 
-		public static Bitmap TextureConverterTextureToBitmap(Texture2D texture, byte[] data)
+		public static DirectBitmap YUY2TextureToBitmap(Texture2D texture, byte[] data)
 		{
-			Bitmap bitmap = null;
-			BitmapData bmd = null;
+			int width = texture.Width;
+			int height = texture.Height;
+			DirectBitmap bitmap = new DirectBitmap(width, height);
 			try
 			{
-				bitmap = new Bitmap(texture.Width, texture.Height);
-				Rectangle rect = new Rectangle(0, 0, texture.Width, texture.Height);
-				bmd = bitmap.LockBits(rect, ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
-				int len = Math.Abs(bmd.Stride) * bmd.Height;
-				bool fixAlpha = texture.KTXBaseInternalFormat() == KTXBaseInternalFormat.RED || texture.KTXBaseInternalFormat() == KTXBaseInternalFormat.RG;
-				if (!Ponvert(data, bmd.Scan0, texture.Width, texture.Height, data.Length, (int)ToQFormat(texture.TextureFormat), len, fixAlpha))
-				{
-					bitmap.UnlockBits(bmd);
-					bitmap.Dispose();
-					return null;
-				}
-
-				bitmap.UnlockBits(bmd);
-				bitmap.RotateFlip(RotateFlipType.RotateNoneFlipY);
+				Yuy2Decoder.DecompressYUY2(data, width, height, bitmap.Bits);
 				return bitmap;
 			}
 			catch
 			{
-				if (bitmap != null)
-				{
-					if (bmd != null)
-					{
-						bitmap.UnlockBits(bmd);
-					}
-					bitmap.Dispose();
-				}
-
+				bitmap.Dispose();
 				throw;
 			}
 		}
 
-		public static Bitmap TexgenpackTextureToBitmap(Texture2D texture, byte[] data)
+		public static DirectBitmap PVRTCTextureToBitmap(Texture2D texture, byte[] data)
 		{
-			Bitmap bitmap = null;
-			BitmapData bmd = null;
+			int width = texture.Width;
+			int height = texture.Height;
+			int bitCount = texture.PVRTCBitCount();
+			DirectBitmap bitmap = new DirectBitmap(width, height);
 			try
 			{
-				bitmap = new Bitmap(texture.Width, texture.Height);
-				Rectangle rect = new Rectangle(0, 0, texture.Width, texture.Height);
-				bmd = bitmap.LockBits(rect, ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
-				bool fixAlpha = texture.KTXBaseInternalFormat() == KTXBaseInternalFormat.RED || texture.KTXBaseInternalFormat() == KTXBaseInternalFormat.RG;
-				texgenpackdecode((int)ToTexgenpackTexturetype(texture.TextureFormat), data, texture.Width, texture.Height, bmd.Scan0, fixAlpha);
-				bitmap.UnlockBits(bmd);
-				bitmap.RotateFlip(RotateFlipType.RotateNoneFlipY);
+				PvrtcDecoder.DecompressPVRTC(data, width, height, bitmap.Bits, bitCount == 2);
+				bitmap.Bitmap.RotateFlip(RotateFlipType.RotateNoneFlipY);
 				return bitmap;
 			}
 			catch
 			{
-				if (bitmap != null)
-				{
-					if (bmd != null)
-					{
-						bitmap.UnlockBits(bmd);
-					}
-					bitmap.Dispose();
-				}
-
+				bitmap.Dispose();
 				throw;
 			}
 		}
 
-		public static Bitmap PVRToBitmap(byte[] data, int width, int height)
+		public static DirectBitmap ASTCTextureToBitmap(Texture2D texture, byte[] data)
 		{
-			Bitmap bitmap = null;
-			BitmapData bmd = null;
+			int width = texture.Width;
+			int height = texture.Height;
+			int blockSize = texture.ASTCBlockSize();
+			DirectBitmap bitmap = new DirectBitmap(width, height);
 			try
 			{
-				bitmap = new Bitmap(width, height);
-				Rectangle rect = new Rectangle(0, 0, width, height);
-				bmd = bitmap.LockBits(rect, ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
-				int len = Math.Abs(bmd.Stride) * bmd.Height;
-				if (!DecompressPVR(data, bmd.Scan0, len))
-				{
-					bitmap.UnlockBits(bmd);
-					bitmap.Dispose();
-					return null;
-				}
-
-				bitmap.UnlockBits(bmd);
-				bitmap.RotateFlip(RotateFlipType.RotateNoneFlipY);
+				AstcDecoder.DecodeASTC(data, width, height, blockSize, blockSize, bitmap.Bits);
 				return bitmap;
 			}
 			catch
 			{
-				if (bitmap != null)
-				{
-					if (bmd != null)
-					{
-						bitmap.UnlockBits(bmd);
-					}
-					bitmap.Dispose();
-				}
+				bitmap.Dispose();
+				throw;
+			}
+		}
 
+		public static DirectBitmap TextureConverterTextureToBitmap(Texture2D texture, byte[] data)
+		{
+			bool fixAlpha = texture.KTXBaseInternalFormat() == KTXBaseInternalFormat.RED || texture.KTXBaseInternalFormat() == KTXBaseInternalFormat.RG;
+			DirectBitmap bitmap = new DirectBitmap(texture.Width, texture.Height);
+			try
+			{
+				int len = bitmap.Stride * bitmap.Height;
+				if (Ponvert(data, bitmap.BitsPtr, texture.Width, texture.Height, data.Length, (int)ToQFormat(texture.TextureFormat), len, fixAlpha))
+				{
+					bitmap.Bitmap.RotateFlip(RotateFlipType.RotateNoneFlipY);
+					return bitmap;
+				}
+				else
+				{
+					bitmap.Dispose();
+					return null;
+				}
+			}
+			catch
+			{
+				bitmap.Dispose();
+				throw;
+			}
+		}
+
+		public static DirectBitmap TexgenpackTextureToBitmap(Texture2D texture, byte[] data)
+		{
+			bool fixAlpha = texture.KTXBaseInternalFormat() == KTXBaseInternalFormat.RED || texture.KTXBaseInternalFormat() == KTXBaseInternalFormat.RG;
+			DirectBitmap bitmap = new DirectBitmap(texture.Width, texture.Height);
+			try
+			{
+				texgenpackdecode((int)ToTexgenpackTexturetype(texture.TextureFormat), data, texture.Width, texture.Height, bitmap.BitsPtr, fixAlpha);
+				bitmap.Bitmap.RotateFlip(RotateFlipType.RotateNoneFlipY);
+				return bitmap;
+			}
+			catch
+			{
+				bitmap.Dispose();
+				throw;
+			}
+		}
+
+		public static DirectBitmap PVRToBitmap(byte[] data, int width, int height)
+		{
+			DirectBitmap bitmap = new DirectBitmap(width, height);
+			try
+			{
+				int len = Math.Abs(bitmap.Stride) * bitmap.Height;
+				if (DecompressPVR(data, bitmap.BitsPtr, len))
+				{
+					bitmap.Bitmap.RotateFlip(RotateFlipType.RotateNoneFlipY);
+					return bitmap;
+				}
+				else
+				{
+					bitmap.Dispose();
+					return null;
+				}
+			}
+			catch
+			{
+				bitmap.Dispose();
 				throw;
 			}
 		}

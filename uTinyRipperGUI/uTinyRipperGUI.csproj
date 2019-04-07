@@ -39,7 +39,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DebugType>full</DebugType>
     <PlatformTarget>x64</PlatformTarget>
-    <LangVersion>7.2</LangVersion>
+    <LangVersion>7.3</LangVersion>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <BaseIntermediateOutputPath>..\Bins\obj\</BaseIntermediateOutputPath>
@@ -51,7 +51,7 @@
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>x64</PlatformTarget>
-    <LangVersion>7.2</LangVersion>
+    <LangVersion>7.3</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
@@ -67,7 +67,7 @@
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
     <DebugType>full</DebugType>
     <PlatformTarget>x64</PlatformTarget>
-    <LangVersion>7.2</LangVersion>
+    <LangVersion>7.3</LangVersion>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <BaseIntermediateOutputPath>..\Bins\obj\</BaseIntermediateOutputPath>
@@ -81,7 +81,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DebugType>full</DebugType>
     <PlatformTarget>x86</PlatformTarget>
-    <LangVersion>7.2</LangVersion>
+    <LangVersion>7.3</LangVersion>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <BaseIntermediateOutputPath>..\Bins\obj\</BaseIntermediateOutputPath>
@@ -95,7 +95,7 @@
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>x86</PlatformTarget>
-    <LangVersion>7.2</LangVersion>
+    <LangVersion>7.3</LangVersion>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <BaseIntermediateOutputPath>..\Bins\obj\</BaseIntermediateOutputPath>
@@ -109,7 +109,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DebugType>full</DebugType>
     <PlatformTarget>x86</PlatformTarget>
-    <LangVersion>7.2</LangVersion>
+    <LangVersion>7.3</LangVersion>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <BaseIntermediateOutputPath>..\Bins\obj\</BaseIntermediateOutputPath>
@@ -138,15 +138,29 @@
       <Generator>MSBuild:Compile</Generator>
     </ApplicationDefinition>
     <Compile Include="Exporters\Audio\AudioConverter.cs" />
+    <Compile Include="Exporters\Shader\ShaderVulkanExporter.cs" />
     <Compile Include="Exporters\Texture\TextureConverter.cs" />
     <Compile Include="Exporters\Texture\Texture2DExtensions.cs" />
     <Compile Include="Exporters\Texture\TextureFormatExtensions.cs" />
     <Compile Include="OutputLogger.cs" />
+    <Compile Include="ThirdParty\CSspv\Disassembler.cs" />
+    <Compile Include="ThirdParty\CSspv\EnumValuesExtensions.cs" />
+    <Compile Include="ThirdParty\CSspv\Instruction.cs" />
+    <Compile Include="ThirdParty\CSspv\Module.cs" />
+    <Compile Include="ThirdParty\CSspv\OperandType.cs" />
+    <Compile Include="ThirdParty\CSspv\ParsedInstruction.cs" />
+    <Compile Include="ThirdParty\CSspv\Reader.cs" />
+    <Compile Include="ThirdParty\CSspv\SpirV.Core.Grammar.cs" />
+    <Compile Include="ThirdParty\CSspv\SpirV.Meta.cs" />
+    <Compile Include="ThirdParty\CSspv\Types.cs" />
     <Compile Include="ThirdParty\D3DCompiler\D3DCompiler.cs" />
     <Compile Include="ThirdParty\D3DCompiler\DotNetDxc.cs" />
     <Compile Include="ThirdParty\FMOD Studio API\fmod.cs" />
     <Compile Include="ThirdParty\FMOD Studio API\fmod_dsp.cs" />
     <Compile Include="ThirdParty\FMOD Studio API\fmod_errors.cs" />
+    <Compile Include="ThirdParty\Smolv\OpData.cs" />
+    <Compile Include="ThirdParty\Smolv\SmolvDecoder.cs" />
+    <Compile Include="ThirdParty\Smolv\SpvOp.cs" />
     <Compile Include="ThirdParty\Texture containers\ContainerType.cs" />
     <Compile Include="ThirdParty\Texture containers\DDS\DDPFFlags.cs" />
     <Compile Include="ThirdParty\Texture containers\DDS\DDSCaps2Flags.cs" />
@@ -154,6 +168,7 @@
     <Compile Include="ThirdParty\Texture containers\DDS\DDSContainer.cs" />
     <Compile Include="ThirdParty\Texture containers\DDS\DDSContainerParameters.cs" />
     <Compile Include="Exporters\Texture\TextureContainer.cs" />
+    <Compile Include="ThirdParty\Texture converters\ASTCDecoder.cs" />
     <Compile Include="ThirdParty\Texture converters\DDSDecompressor.cs" />
     <Compile Include="ThirdParty\Texture containers\DDS\DDSDFlags.cs" />
     <Compile Include="ThirdParty\Texture containers\DDS\DDSFourCCType.cs" />
@@ -171,6 +186,9 @@
     <Compile Include="ThirdParty\Texture containers\PVR\PVRContainerParameters.cs" />
     <Compile Include="ThirdParty\Texture containers\PVR\PVRFlag.cs" />
     <Compile Include="ThirdParty\Texture containers\PVR\PVRPixelFormat.cs" />
+    <Compile Include="ThirdParty\Texture converters\PvrtcDecoder.cs" />
+    <Compile Include="ThirdParty\Texture converters\Yuy2Decoder.cs" />
+    <Compile Include="Utils\DirectBitmap.cs" />
     <Compile Include="Utils\PermissionValidator.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -235,10 +253,6 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup Condition=" '$(Platform)' == 'x86' ">
-    <ContentWithTargetPath Include="Libraries\x86\astcenc_x86.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <TargetPath>astcenc.dll</TargetPath>
-    </ContentWithTargetPath>
     <ContentWithTargetPath Include="Libraries\x86\crunch_x86.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <TargetPath>crunch.dll</TargetPath>
@@ -273,10 +287,6 @@
     </ContentWithTargetPath>
   </ItemGroup>
   <ItemGroup Condition=" '$(Platform)' == 'x64' ">
-    <ContentWithTargetPath Include="Libraries\x64\astcenc_x64.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <TargetPath>astcenc.dll</TargetPath>
-    </ContentWithTargetPath>
     <ContentWithTargetPath Include="Libraries\x64\crunch_x64.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <TargetPath>crunch.dll</TargetPath>
