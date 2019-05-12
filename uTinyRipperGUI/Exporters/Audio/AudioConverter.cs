@@ -2,18 +2,17 @@ using FMOD;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace uTinyRipperGUI.Exporters
 {
 	public static class AudioConverter
 	{
-		public static bool ConvertToWav(byte[] data, Stream exportStream)
+		public static byte[] ConvertToWav(byte[] data)
 		{
 			RESULT result = Factory.System_Create(out FMOD.System system);
 			if (result != RESULT.OK)
 			{
-				return false;
+				return null;
 			}
 
 			try
@@ -21,7 +20,7 @@ namespace uTinyRipperGUI.Exporters
 				result = system.init(1, INITFLAGS.NORMAL, IntPtr.Zero);
 				if (result != RESULT.OK)
 				{
-					return false;
+					return null;
 				}
 
 				CREATESOUNDEXINFO exinfo = new CREATESOUNDEXINFO();
@@ -30,7 +29,7 @@ namespace uTinyRipperGUI.Exporters
 				result = system.createSound(data, MODE.OPENMEMORY, ref exinfo, out Sound sound);
 				if (result != RESULT.OK)
 				{
-					return false;
+					return null;
 				}
 
 				try
@@ -38,7 +37,7 @@ namespace uTinyRipperGUI.Exporters
 					result = sound.getSubSound(0, out Sound subsound);
 					if (result != RESULT.OK)
 					{
-						return false;
+						return null;
 					}
 
 					try
@@ -46,52 +45,52 @@ namespace uTinyRipperGUI.Exporters
 						result = subsound.getFormat(out SOUND_TYPE type, out SOUND_FORMAT format, out int numChannels, out int bitsPerSample);
 						if (result != RESULT.OK)
 						{
-							return false;
+							return null;
 						}
 
 						result = subsound.getDefaults(out float frequency, out int priority);
 						if (result != RESULT.OK)
 						{
-							return false;
+							return null;
 						}
 
 						int sampleRate = (int)frequency;
 						result = subsound.getLength(out uint length, TIMEUNIT.PCMBYTES);
 						if (result != RESULT.OK)
 						{
-							return false;
+							return null;
 						}
 
 						result = subsound.@lock(0, length, out IntPtr ptr1, out IntPtr ptr2, out uint len1, out uint len2);
 						if (result != RESULT.OK)
 						{
-							return false;
+							return null;
 						}
 
-						using (BinaryWriter writer = new BinaryWriter(exportStream))
+						const int WavHeaderLength = 44;
+						int bufferLen = (int)(WavHeaderLength + len1);
+						byte[] buffer = new byte[bufferLen];
+						using (MemoryStream stream = new MemoryStream(buffer))
 						{
-							writer.Write(Encoding.UTF8.GetBytes("RIFF"));
-							writer.Write(len1 + 36);
-							writer.Write(Encoding.UTF8.GetBytes("WAVEfmt "));
-							writer.Write(16);
-							writer.Write((short)1);
-							writer.Write((short)numChannels);
-							writer.Write(sampleRate);
-							writer.Write(sampleRate * numChannels * bitsPerSample / 8);
-							writer.Write((short)(numChannels * bitsPerSample / 8));
-							writer.Write((short)bitsPerSample);
-							writer.Write(Encoding.UTF8.GetBytes("data"));
-							writer.Write(len1);
-
-							for (int i = 0; i < len1; i++)
+							using (BinaryWriter writer = new BinaryWriter(stream))
 							{
-								byte value = Marshal.ReadByte(ptr1, i);
-								writer.Write(value);
+								writer.Write(RiffFourCC);
+								writer.Write(36 + len1);
+								writer.Write(WaveEightCC);
+								writer.Write(16);
+								writer.Write((short)1);
+								writer.Write((short)numChannels);
+								writer.Write(sampleRate);
+								writer.Write(sampleRate * numChannels * bitsPerSample / 8);
+								writer.Write((short)(numChannels * bitsPerSample / 8));
+								writer.Write((short)bitsPerSample);
+								writer.Write(DataFourCC);
+								writer.Write(len1);
 							}
 						}
-
-						result = subsound.unlock(ptr1, ptr2, len1, len2);
-						return result == RESULT.OK;
+						Marshal.Copy(ptr1, buffer, WavHeaderLength, (int)len1);
+						subsound.unlock(ptr1, ptr2, len1, len2);
+						return buffer;
 					}
 					finally
 					{
@@ -108,5 +107,18 @@ namespace uTinyRipperGUI.Exporters
 				system.release();
 			}
 		}
+
+		/// <summary>
+		/// 'RIFF' ascii
+		/// </summary>
+		private const uint RiffFourCC = 0x46464952;
+		/// <summary>
+		/// 'WAVEfmt ' ascii
+		/// </summary>
+		private const ulong WaveEightCC = 0x20746D6645564157;
+		/// <summary>
+		/// 'data' ascii
+		/// </summary>
+		private const uint DataFourCC = 0x61746164;
 	}
 }

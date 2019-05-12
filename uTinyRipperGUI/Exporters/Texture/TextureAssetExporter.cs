@@ -14,9 +14,9 @@ namespace uTinyRipperGUI.Exporters
 {
 	public class TextureAssetExporter : IAssetExporter
 	{
-		public static bool ExportTexture(IExportContainer container, Texture2D texture, Stream exportStream)
+		public static bool ExportTexture(Texture2D texture, Stream exportStream)
 		{
-			byte[] buffer = (byte[])texture.GetImageData(container.Version);
+			byte[] buffer = (byte[])texture.GetImageData();
 			if (buffer.Length == 0)
 			{
 				return false;
@@ -43,18 +43,20 @@ namespace uTinyRipperGUI.Exporters
 				case TextureFormat.DXT1:
 				case TextureFormat.DXT3:
 				case TextureFormat.DXT5:
+					return TextureConverter.DXTTextureToBitmap(texture, data);
+
 				case TextureFormat.Alpha8:
 				case TextureFormat.ARGB4444:
 				case TextureFormat.RGB24:
 				case TextureFormat.RGBA32:
 				case TextureFormat.ARGB32:
+				case TextureFormat.RGB565:
 				case TextureFormat.R16:
 				case TextureFormat.RGBA4444:
 				case TextureFormat.BGRA32:
 				case TextureFormat.RG16:
 				case TextureFormat.R8:
-				case TextureFormat.RGB565:
-					return TextureConverter.DDSTextureToBitmap(texture, data);
+					return TextureConverter.RGBTextureToBitmap(texture, data);
 
 				case TextureFormat.YUY2:
 					return TextureConverter.YUY2TextureToBitmap(texture, data);
@@ -71,7 +73,7 @@ namespace uTinyRipperGUI.Exporters
 				case TextureFormat.ETC2_RGBA8:
 				case TextureFormat.ETC_RGB4_3DS:
 				case TextureFormat.ETC_RGBA8_3DS:
-					return TextureConverter.PVRTextureToBitmap(texture, data);
+					return TextureConverter.ETCTextureToBitmap(texture, data);
 
 				case TextureFormat.ASTC_RGB_4x4:
 				case TextureFormat.ASTC_RGB_5x5:
@@ -110,11 +112,11 @@ namespace uTinyRipperGUI.Exporters
 
 				case TextureFormat.DXT1Crunched:
 				case TextureFormat.DXT5Crunched:
-					return TextureConverter.DDSCrunchedTextureToBitmap(texture, data);
+					return TextureConverter.DXTCrunchedTextureToBitmap(texture, data);
 
 				case TextureFormat.ETC_RGB4Crunched:
 				case TextureFormat.ETC2_RGBA8Crunched:
-					return TextureConverter.PVRCrunchedTextureToBitmap(texture, data);
+					return TextureConverter.ETCCrunchedTextureToBitmap(texture, data);
 
 				default:
 					Logger.Log(LogType.Error, LogCategory.Export, $"Unsupported texture format '{texture.TextureFormat}'");
@@ -122,7 +124,7 @@ namespace uTinyRipperGUI.Exporters
 			}
 		}
 
-		public bool IsHandle(Object asset)
+		public bool IsHandle(Object asset, ExportOptions options)
 		{
 			if (asset.ClassID == ClassIDType.Texture2D)
 			{
@@ -132,33 +134,33 @@ namespace uTinyRipperGUI.Exporters
 			return true;
 		}
 
-		public void Export(IExportContainer container, Object asset, string path)
-		{
-			Export(container, asset, path, null);
-		}
-
-		public void Export(IExportContainer container, Object asset, string path, Action<IExportContainer, Object, string> callback)
+		public bool Export(IExportContainer container, Object asset, string path)
 		{
 			Texture2D texture = (Texture2D)asset;
 			if (!texture.CheckAssetIntegrity())
 			{
-				Logger.Log(LogType.Warning, LogCategory.Export, $"Can't export '{texture.Name}' because resources file '{texture.StreamData.Path}' wasn't found");
-				return;
+				Logger.Log(LogType.Warning, LogCategory.Export, $"Can't export '{texture.Name}' because resources file '{texture.StreamData.Path}' hasn't been found");
+				return false;
 			}
 
 			using (Stream fileStream = FileUtils.CreateVirtualFile(path))
 			{
-				bool result = ExportTexture(container, texture, fileStream);
-				if (!result)
+				if (!ExportTexture(texture, fileStream))
 				{
 					Logger.Log(LogType.Warning, LogCategory.Export, $"Unable to convert '{texture.Name}' to bitmap");
+					return false;
 				}
 			}
+			return true;
+		}
 
+		public void Export(IExportContainer container, Object asset, string path, Action<IExportContainer, Object, string> callback)
+		{
+			Export(container, asset, path);
 			callback?.Invoke(container, asset, path);
 		}
 
-		public void Export(IExportContainer container, IEnumerable<Object> assets, string path)
+		public bool Export(IExportContainer container, IEnumerable<Object> assets, string path)
 		{
 			throw new NotSupportedException();
 		}

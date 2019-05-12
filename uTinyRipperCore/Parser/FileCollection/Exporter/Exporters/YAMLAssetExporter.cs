@@ -12,17 +12,12 @@ namespace uTinyRipper.AssetExporters
 {
 	public class YAMLAssetExporter : IAssetExporter
 	{
-		public bool IsHandle(Object asset)
+		public bool IsHandle(Object asset, ExportOptions options)
 		{
 			return true;
 		}
 
-		public void Export(IExportContainer container, Object asset, string path)
-		{
-			Export(container, asset, path, null);
-		}
-		
-		public void Export(IExportContainer container, Object asset, string path, Action<IExportContainer, Object, string> callback)
+		public bool Export(IExportContainer container, Object asset, string path)
 		{
 			using (Stream fileStream = FileUtils.CreateVirtualFile(path))
 			{
@@ -34,10 +29,16 @@ namespace uTinyRipper.AssetExporters
 					writer.Write(streamWriter);
 				}
 			}
+			return true;
+		}
+		
+		public void Export(IExportContainer container, Object asset, string path, Action<IExportContainer, Object, string> callback)
+		{
+			Export(container, asset, path);
 			callback?.Invoke(container, asset, path);
 		}
 
-		public void Export(IExportContainer container, IEnumerable<Object> assets, string path)
+		public bool Export(IExportContainer container, IEnumerable<Object> assets, string path)
 		{
 			using (Stream fileStream = FileUtils.CreateVirtualFile(path))
 			{
@@ -53,11 +54,12 @@ namespace uTinyRipper.AssetExporters
 					writer.WriteTail(streamWriter);
 				}
 			}
+			return true;
 		}
 
 		public void Export(IExportContainer container, IEnumerable<Object> assets, string path, Action<IExportContainer, Object, string> callback)
 		{
-			throw new NotSupportedException();
+			throw new NotSupportedException("YAML supports only single file export");
 		}
 
 		public IExportCollection CreateCollection(VirtualSerializedFile virtualFile, Object asset, List<Object> depList)
@@ -68,17 +70,19 @@ namespace uTinyRipper.AssetExporters
 				{
 					return new SceneExportCollection(this, virtualFile, asset.File);
 				}
-				else
+				else if (PrefabExportCollection.IsValidAsset(asset))
 				{
 					return new PrefabExportCollection(this, virtualFile, asset);
+				}
+				else
+				{
+					return new FailExportCollection(this, asset);
 				}
 			}
 			else
 			{
 				switch (asset.ClassID)
 				{
-					case ClassIDType.NavMeshData:
-						return new EmptyExportCollection();
 					case ClassIDType.AnimatorController:
 						return new AnimatorControllerExportCollection(this, virtualFile, asset);
 
@@ -101,7 +105,7 @@ namespace uTinyRipper.AssetExporters
 					case ClassIDType.MonoBehaviour:
 						{
 							MonoBehaviour monoBehaviour = (MonoBehaviour)asset;
-							if (monoBehaviour.IsScriptableObject())
+							if (monoBehaviour.IsScriptableObject)
 							{
 								return new AssetExportCollection(this, asset);
 							}

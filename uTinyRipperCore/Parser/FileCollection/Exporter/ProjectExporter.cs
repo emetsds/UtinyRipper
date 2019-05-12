@@ -42,6 +42,7 @@ namespace uTinyRipper.AssetExporters
 			OverrideYamlExporter(ClassIDType.MeshFilter);
 			OverrideYamlExporter(ClassIDType.OcclusionPortal);
 			OverrideYamlExporter(ClassIDType.Mesh);
+			OverrideYamlExporter(ClassIDType.Skybox);
 			OverrideYamlExporter(ClassIDType.QualitySettings);
 			OverrideYamlExporter(ClassIDType.TextAsset);
 			OverrideYamlExporter(ClassIDType.Rigidbody2D);
@@ -72,9 +73,12 @@ namespace uTinyRipper.AssetExporters
 			OverrideYamlExporter(ClassIDType.Animation);
 			OverrideYamlExporter(ClassIDType.MonoBehaviour);
 			OverrideYamlExporter(ClassIDType.Texture3D);
+			OverrideYamlExporter(ClassIDType.NewAnimationTrack);
 			OverrideYamlExporter(ClassIDType.FlareLayer);
-			OverrideYamlExporter(ClassIDType.NavMeshAreas);
+			OverrideYamlExporter(ClassIDType.NavMeshProjectSettings);
 			OverrideYamlExporter(ClassIDType.Font);
+			OverrideYamlExporter(ClassIDType.GUITexture);
+			OverrideYamlExporter(ClassIDType.GUIText);
 			OverrideYamlExporter(ClassIDType.PhysicMaterial);
 			OverrideYamlExporter(ClassIDType.SphereCollider);
 			OverrideYamlExporter(ClassIDType.CapsuleCollider);
@@ -88,18 +92,25 @@ namespace uTinyRipper.AssetExporters
 			OverrideYamlExporter(ClassIDType.TerrainData);
 			OverrideYamlExporter(ClassIDType.LightmapSettings);
 			OverrideYamlExporter(ClassIDType.AudioReverbZone);
+			OverrideYamlExporter(ClassIDType.OffMeshLink);
 			OverrideYamlExporter(ClassIDType.OcclusionArea);
+			OverrideYamlExporter(ClassIDType.NavMeshObsolete);
+			OverrideYamlExporter(ClassIDType.NavMeshAgent);
 			OverrideYamlExporter(ClassIDType.NavMeshSettings);
 			OverrideYamlExporter(ClassIDType.ParticleSystem);
 			OverrideYamlExporter(ClassIDType.ParticleSystemRenderer);
 			OverrideYamlExporter(ClassIDType.ShaderVariantCollection);
 			OverrideYamlExporter(ClassIDType.LODGroup);
+			OverrideYamlExporter(ClassIDType.NavMeshObstacle);
+			OverrideYamlExporter(ClassIDType.SortingGroup);
 			OverrideYamlExporter(ClassIDType.SpriteRenderer);
+			OverrideYamlExporter(ClassIDType.ReflectionProbe);
 			OverrideYamlExporter(ClassIDType.Terrain);
 			OverrideYamlExporter(ClassIDType.AnimatorOverrideController);
 			OverrideYamlExporter(ClassIDType.CanvasRenderer);
 			OverrideYamlExporter(ClassIDType.Canvas);
 			OverrideYamlExporter(ClassIDType.RectTransform);
+			OverrideYamlExporter(ClassIDType.CanvasGroup);
 			OverrideYamlExporter(ClassIDType.ClusterInputManager);
 			OverrideYamlExporter(ClassIDType.NavMeshData);
 			OverrideYamlExporter(ClassIDType.UnityConnectSettings);
@@ -147,15 +158,15 @@ namespace uTinyRipper.AssetExporters
 			OverrideExporter(classType, BinExporter);
 		}
 
-		public void Export(string path, FileCollection fileCollection, Object asset)
+		public void Export(string path, FileCollection fileCollection, Object asset, ExportOptions options)
 		{
-			Export(path, fileCollection, new Object[] { asset });
+			Export(path, fileCollection, new Object[] { asset }, options);
 		}
 
-		public void Export(string path, FileCollection fileCollection, IEnumerable<Object> assets)
+		public void Export(string path, FileCollection fileCollection, IEnumerable<Object> assets, ExportOptions options)
 		{
 			EventExportPreparationStarted?.Invoke();
-			VirtualSerializedFile virtualFile = new VirtualSerializedFile();
+			VirtualSerializedFile virtualFile = new VirtualSerializedFile(options);
 			List<IExportCollection> collections = new List<IExportCollection>();
 			// speed up fetching a little bit
 			List<Object> depList = new List<Object>();
@@ -168,7 +179,7 @@ namespace uTinyRipper.AssetExporters
 				Object asset = depList[i];
 				if (!queued.Contains(asset))
 				{
-					IExportCollection collection = CreateCollection(virtualFile, asset, depList);
+					IExportCollection collection = CreateCollection(virtualFile, asset, options);
 					foreach (Object element in collection.Assets)
 					{
 						queued.Add(element);
@@ -200,7 +211,7 @@ namespace uTinyRipper.AssetExporters
 			EventExportPreparationFinished?.Invoke();
 
 			EventExportStarted?.Invoke();
-			ProjectAssetContainer container = new ProjectAssetContainer(this, fileCollection.FetchAssets(), virtualFile, collections);
+			ProjectAssetContainer container = new ProjectAssetContainer(this, virtualFile, fileCollection.FetchAssets(), collections, options);
 			for (int i = 0; i < collections.Count; i++)
 			{
 				IExportCollection collection = collections[i];
@@ -255,14 +266,14 @@ namespace uTinyRipper.AssetExporters
 			throw new NotSupportedException($"There is no exporter that know {nameof(AssetType)} for unknown asset '{classID}'");
 		}
 
-		private IExportCollection CreateCollection(VirtualSerializedFile file, Object asset, List<Object> depList)
+		private IExportCollection CreateCollection(VirtualSerializedFile file, Object asset, ExportOptions options)
 		{
 			Stack<IAssetExporter> exporters = m_exporters[asset.ClassID];
 			foreach (IAssetExporter exporter in exporters)
 			{
-				if (exporter.IsHandle(asset))
+				if (exporter.IsHandle(asset, options))
 				{
-					return exporter.CreateCollection(file, asset, depList);
+					return exporter.CreateCollection(file, asset);
 				}
 			}
 			throw new Exception($"There is no exporter that can handle '{asset}'");

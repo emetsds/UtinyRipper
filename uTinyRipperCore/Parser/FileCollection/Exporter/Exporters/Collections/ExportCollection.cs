@@ -51,10 +51,10 @@ namespace uTinyRipper.AssetExporters
 			int digits = BitConverterExtensions.GetDigitsCount(value);
 			if(digits > 5)
 			{
-				throw new System.ArgumentException($"Value {value} for main export ID must have no more than 5 digits");
+				throw new ArgumentException($"Value {value} for main export ID must have no more than 5 digits");
 			}
 #endif
-			return (classID * 100000) | value;
+			return (classID * 100000) + value;
 		}
 
 		public abstract bool Export(ProjectAssetContainer container, string dirPath);
@@ -113,8 +113,8 @@ namespace uTinyRipper.AssetExporters
 			}
 			fileName = FileNameRegex.Replace(fileName, string.Empty);
 
-			fileName = DirectoryUtils.GetMaxIndexName(dirPath, fileName);
 			fileName = $"{fileName}.{GetExportExtension(asset)}";
+			fileName = FileUtils.GetUniqueName(dirPath, fileName);
 			return fileName;
 		}
 

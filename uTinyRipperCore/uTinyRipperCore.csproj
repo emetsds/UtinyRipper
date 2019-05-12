@@ -82,7 +82,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Virtual|x64'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>..\Bins\$(Configuration)\$(Platform)\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;UNIVERSAL;VIRTUAL</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;VIRTUAL</DefineConstants>
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
     <DebugType>full</DebugType>
     <PlatformTarget>x64</PlatformTarget>
@@ -140,15 +140,85 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes\EnumNameAttribute.cs" />
+    <Compile Include="Parser\Classes\AnimationClip\AnimationClipSettings.cs" />
+    <Compile Include="Parser\Classes\Avatar\HumanBone.cs" />
+    <Compile Include="Parser\Classes\Avatar\HumanDescription.cs" />
+    <Compile Include="Parser\Classes\Avatar\SkeletonBone.cs" />
+    <Compile Include="Parser\Classes\Avatar\SkeletonBoneLimit.cs" />
+    <Compile Include="Parser\Classes\Base\GUIElement.cs" />
+    <Compile Include="Parser\Classes\Base\Object\HideFlags.cs" />
+    <Compile Include="Parser\Classes\Base\Renderer\ReceiveGI.cs" />
+    <Compile Include="Parser\Classes\Camera\FieldOfViewAxis.cs" />
+    <Compile Include="Parser\Classes\CanvasGroup.cs" />
+    <Compile Include="Parser\Classes\GUITexture.cs" />
+    <Compile Include="Parser\Classes\GUIText\GUIText.cs" />
+    <Compile Include="Parser\Classes\GUIText\TextAlignment.cs" />
+    <Compile Include="Parser\Classes\GUIText\TextAnchor.cs" />
+    <Compile Include="Parser\Classes\LightmapSettings\DenoiserType.cs" />
+    <Compile Include="Parser\Classes\LightmapSettings\FilterMode.cs" />
+    <Compile Include="Parser\Classes\LightmapSettings\FilterType.cs" />
+    <Compile Include="Parser\Classes\LightmapSettings\GIWorkflowMode.cs" />
+    <Compile Include="Parser\Classes\LightmapSettings\Lightmapper.cs" />
+    <Compile Include="Parser\Classes\LightmapSettings\ReflectionCubemapCompression.cs" />
+    <Compile Include="Parser\Classes\LightmapSettings\Sampling.cs" />
+    <Compile Include="Parser\Classes\Mesh\ChannelFormat\ChannelFormat.cs" />
+    <Compile Include="Parser\Classes\Mesh\ChannelFormat\ChannelFormatV2019.cs" />
+    <Compile Include="Parser\Classes\Mesh\ChannelFormat\ChannelFormatV4.cs" />
+    <Compile Include="Parser\Classes\Mesh\ChannelType\ChannelTypeV5.cs" />
+    <Compile Include="Parser\Classes\Mesh\IndexFormat.cs" />
+    <Compile Include="Parser\Classes\Mesh\MeshOptimizationFlags.cs" />
+    <Compile Include="Parser\Classes\ParticleSystem\UV\ParticleSystemAnimationRowMode.cs" />
+    <Compile Include="Parser\Classes\Serialize\MinMaxAABB.cs" />
+    <Compile Include="Parser\Classes\Mesh\VariableBoneCountWeights.cs" />
+    <Compile Include="Parser\Classes\NavMesh.cs" />
+    <Compile Include="Parser\Classes\NavMeshAgent\NavMeshAgent.cs" />
+    <Compile Include="Parser\Classes\NavMeshAgent\ObstacleAvoidanceType.cs" />
+    <Compile Include="Parser\Classes\NavMeshObstacle\NavMeshObstacle.cs" />
+    <Compile Include="Parser\Classes\NavMeshObstacle\NavMeshObstacleShape.cs" />
+    <Compile Include="Parser\Classes\OffMeshLink.cs" />
+    <Compile Include="Parser\Classes\ReflectionProbe\ReflectionProbe.cs" />
+    <Compile Include="Parser\Classes\ReflectionProbe\ReflectionProbeClearFlags.cs" />
+    <Compile Include="Parser\Classes\ReflectionProbe\ReflectionProbeMode.cs" />
+    <Compile Include="Parser\Classes\ReflectionProbe\ReflectionProbeRefreshMode.cs" />
+    <Compile Include="Parser\Classes\ReflectionProbe\ReflectionProbeTimeSlicingMode.cs" />
+    <Compile Include="Parser\Classes\ReflectionProbe\ReflectionProbeType.cs" />
+    <Compile Include="Parser\Classes\Shader\KeywordTargetInfo.cs" />
+    <Compile Include="Parser\Classes\Shader\ShaderCompilationInfo.cs" />
+    <Compile Include="Parser\Classes\Shader\ShaderError.cs" />
+    <Compile Include="Parser\Classes\Shader\ShaderSnippet.cs" />
+    <Compile Include="Parser\Classes\Skybox.cs" />
+    <Compile Include="Parser\Classes\SortingGroup.cs" />
+    <Compile Include="Parser\Classes\Sprite\SecondarySpriteTexture.cs" />
+    <Compile Include="Parser\FileCollection\Exporter\Exporters\Collections\FailExportCollection.cs" />
     <Compile Include="Parser\FileCollection\Exporter\Exporters\Font\FontAssetExporter.cs" />
     <Compile Include="Parser\FileCollection\Exporter\Exporters\Font\FontExportCollection.cs" />
     <Compile Include="Parser\FileCollection\Exporter\Exporters\MovieTexture\MovieTextureAssetExporter.cs" />
     <Compile Include="Parser\FileCollection\Exporter\Exporters\MovieTexture\MovieTextureExportCollection.cs" />
     <Compile Include="Parser\FileCollection\Exporter\Exporters\TextAsset\TextAssetExportCollection.cs" />
     <Compile Include="Parser\FileCollection\Exporter\Exporters\TextAsset\TextAssetExporter.cs" />
+    <Compile Include="Parser\FileCollection\Exporter\ExportOptions.cs" />
+    <Compile Include="Parser\Format\ArchiveFile\ArchiveFileScheme.cs" />
+    <Compile Include="Parser\IO\Extensions\EndianReaderExtensions.cs" />
+    <Compile Include="Parser\Format\ArchiveFile\ArchiveType.cs" />
+    <Compile Include="Parser\Format\ArchiveFile\Parser\ArchiveFileEntry.cs" />
+    <Compile Include="Parser\Format\ArchiveFile\Parser\ArchiveHeader.cs" />
+    <Compile Include="Parser\Format\BundleFile\BundleFileScheme.cs" />
+    <Compile Include="Parser\Format\BundleFile\IO\BundleFileReader.cs" />
+    <Compile Include="Parser\Format\BundleFile\IO\IBundleFileReadable.cs" />
+    <Compile Include="Parser\Format\BundleFile\Parser\BundleFileEntry.cs" />
+    <Compile Include="Parser\Format\BundleFile\Parser\BundleMetadata.cs" />
+    <Compile Include="Parser\Format\Data\FileSchemeList.cs" />
+    <Compile Include="Parser\Format\Data\Parser\FileEntry.cs" />
+    <Compile Include="Parser\Format\Data\Parser\FileEntryType.cs" />
+    <Compile Include="Parser\Format\Data\Parser\FileList.cs" />
+    <Compile Include="Parser\Format\ResourceFile\IResourceFile.cs" />
+    <Compile Include="Parser\Format\ResourceFile\ResourceFileScheme.cs" />
+    <Compile Include="Parser\Format\SerializedFile\SerializedFileScheme.cs" />
+    <Compile Include="Parser\Format\WebFile\Parser\WebHeader.cs" />
+    <Compile Include="Parser\Format\WebFile\WebFileScheme.cs" />
     <Compile Include="ThirdParty\YAML\Base\ScalarType.cs" />
     <Compile Include="ThirdParty\YAML\Utils\Extensions\EmitterExtensions.cs" />
-    <Compile Include="ThirdParty\YAML\Utils\Extensions\IDictionaryExtensions.cs" />
+    <Compile Include="ThirdParty\YAML\Utils\Extensions\IReadOnlyDictionaryExtensions.cs" />
     <Compile Include="ThirdParty\YAML\Utils\Extensions\IReadOnlyListExtensions.cs" />
     <Compile Include="IO\Endian\AlignType.cs" />
     <Compile Include="IO\Endian\EndianType.cs" />
@@ -379,7 +449,7 @@
     <Compile Include="Parser\Classes\LightProbes\LightProbes.cs" />
     <Compile Include="Parser\Classes\Light\FalloffTable.cs" />
     <Compile Include="Parser\Classes\Light\LightShadowCasterMode.cs" />
-    <Compile Include="Parser\Classes\Mesh\ChannelFormat.cs" />
+    <Compile Include="Parser\Classes\Mesh\ChannelFormat\ChannelFormatV5.cs" />
     <Compile Include="Parser\Classes\Mesh\ChannelType\ChannelType.cs" />
     <Compile Include="Parser\Classes\Mesh\ChannelType\ChannelTypeV2018.cs" />
     <Compile Include="Parser\Classes\Mesh\ChannelType\ChannelTypeV4.cs" />
@@ -419,7 +489,7 @@
     <Compile Include="Parser\Classes\PreloadData.cs" />
     <Compile Include="Parser\Classes\QualitySettings\AnisotropicFiltering.cs" />
     <Compile Include="Parser\Classes\QualitySettings\AntiAliasing.cs" />
-    <Compile Include="Parser\Classes\QualitySettings\BlendWeights.cs" />
+    <Compile Include="Parser\Classes\QualitySettings\SkinWeights.cs" />
     <Compile Include="Parser\Classes\QualitySettings\QualityLevel.cs" />
     <Compile Include="Parser\Classes\QualitySettings\QualitySetting.cs" />
     <Compile Include="Parser\Classes\QualitySettings\QualitySettings.cs" />
@@ -437,11 +507,9 @@
     <Compile Include="Parser\Classes\Serialize\AABBi.cs" />
     <Compile Include="Parser\Classes\Serialize\DateTime.cs" />
     <Compile Include="Parser\Classes\Serialize\FixedBitset.cs" />
-    <Compile Include="Parser\Classes\Serialize\GUIStyle\FontStyle.cs" />
     <Compile Include="Parser\Classes\Serialize\GUIStyle\GUIStyle.cs" />
     <Compile Include="Parser\Classes\Serialize\GUIStyle\GUIStyleState.cs" />
     <Compile Include="Parser\Classes\Serialize\GUIStyle\ImagePosition.cs" />
-    <Compile Include="Parser\Classes\Serialize\GUIStyle\TextAnchor.cs" />
     <Compile Include="Parser\Classes\Serialize\GUIStyle\TextClipping.cs" />
     <Compile Include="Parser\Classes\Serialize\LayerMask.cs" />
     <Compile Include="Parser\Classes\Serialize\Matrix3x4f.cs" />
@@ -605,15 +673,10 @@
     <Compile Include="Parser\Classes\WheelCollider\WheelCollider.cs" />
     <Compile Include="Parser\Classes\WheelCollider\WheelFrictionCurve.cs" />
     <Compile Include="Parser\Format\ArchiveFile\ArchiveFile.cs" />
-    <Compile Include="Parser\Format\ArchiveFile\Entry\ArchiveFileEntry.cs" />
-    <Compile Include="Parser\Format\ArchiveFile\Entry\ArchiveMetadata.cs" />
-    <Compile Include="Parser\Format\BundleFile\Entry\BundleMetadata.cs" />
     <Compile Include="Parser\Format\BundleFile\Parser\BlockInfo.cs" />
     <Compile Include="Parser\Format\BundleFile\Parser\BundleHeader.cs" />
     <Compile Include="Parser\Format\BundleFile\Parser\BundleFlag.cs" />
     <Compile Include="Parser\Format\BundleFile\Parser\ChunkInfo.cs" />
-    <Compile Include="Parser\Format\Data\FileEntryType.cs" />
-    <Compile Include="Parser\FileCollection\DependencyCollection.cs" />
     <Compile Include="Parser\Format\Data\FileScheme.cs" />
     <Compile Include="Parser\Format\SerializedFile\Exceptions\SerializedFileException.cs" />
     <Compile Include="Parser\Format\SerializedFile\IO\SerializedFileReader.cs" />
@@ -622,18 +685,15 @@
     <Compile Include="Parser\Format\SerializedFile\ISerializedFile\VirtualSerializedFile.cs" />
     <Compile Include="Parser\Format\SerializedFile\Parser\RTTIClassHierarchyDescriptor.cs" />
     <Compile Include="Parser\Format\SerializedFile\Parser\SerializedFileHeader.cs" />
-    <Compile Include="Parser\Format\Data\Metadata.cs" />
-    <Compile Include="Parser\Format\Data\FileEntry.cs" />
     <Compile Include="Parser\Format\SerializedFile\Parser\SerializedFileMetadata.cs" />
     <Compile Include="Parser\Format\SerializedFile\Parser\FileIdentifier.cs" />
     <Compile Include="Parser\Format\SerializedFile\Parser\AssetEntry.cs" />
     <Compile Include="Parser\Format\SerializedFile\Parser\ObjectPtr.cs" />
     <Compile Include="Parser\Format\SerializedFile\Parser\RTTIBaseClassDescriptor.cs" />
-    <Compile Include="Parser\Format\SerializedFile\Parser\SerializedFileScheme.cs" />
-    <Compile Include="Parser\Format\Data\TypeTree\TypeTree.cs" />
-    <Compile Include="Parser\Format\Data\TypeTree\TypeTreeNode.cs" />
-    <Compile Include="Parser\Format\WebFile\Entry\WebFileEntry.cs" />
-    <Compile Include="Parser\Format\WebFile\Entry\WebMetadata.cs" />
+    <Compile Include="Parser\Format\SerializedFile\Parser\TypeTree.cs" />
+    <Compile Include="Parser\Format\SerializedFile\Parser\TypeTreeNode.cs" />
+    <Compile Include="Parser\Format\WebFile\Parser\WebFileEntry.cs" />
+    <Compile Include="Parser\Format\WebFile\Parser\WebMetadata.cs" />
     <Compile Include="Parser\Format\WebFile\WebFile.cs" />
     <Compile Include="Parser\Game\Platforms\AndroidGameStructure.cs" />
     <Compile Include="Parser\Game\GameStructure.cs" />
@@ -691,7 +751,6 @@
     <Compile Include="Parser\FileCollection\IFileCollection.cs" />
     <Compile Include="Parser\Format\Data\Asset\AssetInfo.cs" />
     <Compile Include="Parser\Format\SerializedFile\SerializedFile.cs" />
-    <Compile Include="Parser\Format\BundleFile\Entry\BundleFileEntry.cs" />
     <Compile Include="Parser\Classes\AnimationClip\AnimationType.cs" />
     <Compile Include="Parser\Classes\AnimationClip\Editor\StreamedCurveKey.cs" />
     <Compile Include="Parser\Classes\AnimationClip\Editor\StreamedFrame.cs" />
@@ -800,7 +859,7 @@
     <Compile Include="Parser\Classes\Utils\ObjectUtils.cs" />
     <Compile Include="Parser\Format\Data\Asset\AssetType.cs" />
     <Compile Include="Parser\Format\SerializedFile\ISerializedFile\ISerializedFile.cs" />
-    <Compile Include="Parser\Format\Data\TypeTree\TreeNodeType.cs" />
+    <Compile Include="Parser\Format\SerializedFile\Parser\TreeNodeType.cs" />
     <Compile Include="Parser\Format\BundleFile\BundleType.cs" />
     <Compile Include="Parser\Classes\Animation\Animation.cs" />
     <Compile Include="Parser\Classes\Base\EditorExtension.cs" />
@@ -906,7 +965,7 @@
     <Compile Include="Parser\Classes\Serialize\Vector3f.cs" />
     <Compile Include="Parser\Classes\Serialize\Vector4f.cs" />
     <Compile Include="Parser\Classes\Transform.cs" />
-    <Compile Include="Parser\Format\ResourcesFile\ResourcesFile.cs" />
+    <Compile Include="Parser\Format\ResourceFile\ResourceFile.cs" />
     <Compile Include="Parser\IO\ShaderWriter.cs" />
     <Compile Include="Parser\Format\Data\Version\VersionType.cs" />
     <Compile Include="Parser\Format\BundleFile\Parser\BundleCompressType.cs" />
@@ -1076,6 +1135,7 @@
     <Compile Include="ThirdParty\System.Half\HalfHelper.cs" />
     <Compile Include="Parser\Utils\FilenameUtils.cs" />
     <Compile Include="Utils\DirectoryUtils.cs" />
+    <Compile Include="Utils\Extensions\BinaryReaderExtensions.cs" />
     <Compile Include="Utils\Extensions\BitArrayExtensions.cs" />
     <Compile Include="Utils\Extensions\BitConverterExtensions.cs" />
     <Compile Include="Utils\Extensions\ByteArrayExtensions.cs" />

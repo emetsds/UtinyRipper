@@ -26,17 +26,9 @@ namespace uTinyRipper.Classes.LightmapSettingss
 
 		private static int GetSerializedVersion(Version version)
 		{
-			if (Config.IsExportTopmostSerializedVersion)
-			{
-				return 2;
-			}
-
-#warning unknown
-			if (version.IsGreaterEqual(5, 0, 0, VersionType.Beta, 1))
-			{
-				return 2;
-			}
-			return 1;
+			return 2;
+			// unknown (5.0.0a) version
+			//return 1;
 		}
 
 		public void Read(AssetReader reader)
@@ -57,7 +49,7 @@ namespace uTinyRipper.Classes.LightmapSettingss
 		public YAMLNode ExportYAML(IExportContainer container)
 		{
 			YAMLMappingNode node = new YAMLMappingNode();
-			node.AddSerializedVersion(GetSerializedVersion(container.Version));
+			node.AddSerializedVersion(GetSerializedVersion(container.ExportVersion));
 			node.Add(BounceScaleName, BounceScale);
 			node.Add(IndirectOutputScaleName, IndirectOutputScale);
 			node.Add(AlbedoBoostName, AlbedoBoost);

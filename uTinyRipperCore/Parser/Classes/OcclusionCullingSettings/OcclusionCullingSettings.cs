@@ -29,7 +29,7 @@ namespace uTinyRipper.Classes
 			if (asset.ClassID == ClassIDType.MonoBehaviour)
 			{
 				MonoBehaviour monoBeh = (MonoBehaviour)asset;
-				if (!monoBeh.IsSceneObject())
+				if (!monoBeh.IsSceneObject)
 				{
 					return false;
 				}
@@ -249,7 +249,7 @@ namespace uTinyRipper.Classes
 		public EngineGUID SceneGUID;
 		public PPtr<OcclusionCullingData> OcclusionCullingData;
 
-		public const string SceneKeyWord = "Scene";
+		public const string SceneKeyword = nameof(ClassIDType.Scene);
 
 		private byte[] m_PVSData;
 		private PPtr<Renderer>[] m_staticRenderers;

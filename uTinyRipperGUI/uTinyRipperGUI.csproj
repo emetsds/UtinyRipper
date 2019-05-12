@@ -116,9 +116,6 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationManifest>App.manifest</ApplicationManifest>
-  </PropertyGroup>
-  <PropertyGroup>
     <ApplicationIcon>Resources\URIcon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
@@ -168,8 +165,7 @@
     <Compile Include="ThirdParty\Texture containers\DDS\DDSContainer.cs" />
     <Compile Include="ThirdParty\Texture containers\DDS\DDSContainerParameters.cs" />
     <Compile Include="Exporters\Texture\TextureContainer.cs" />
-    <Compile Include="ThirdParty\Texture converters\ASTCDecoder.cs" />
-    <Compile Include="ThirdParty\Texture converters\DDSDecompressor.cs" />
+    <Compile Include="ThirdParty\Texture converters\AstcDecoder.cs" />
     <Compile Include="ThirdParty\Texture containers\DDS\DDSDFlags.cs" />
     <Compile Include="ThirdParty\Texture containers\DDS\DDSFourCCType.cs" />
     <Compile Include="ThirdParty\Texture containers\DDS\DDSPixelFormat.cs" />
@@ -186,7 +182,10 @@
     <Compile Include="ThirdParty\Texture containers\PVR\PVRContainerParameters.cs" />
     <Compile Include="ThirdParty\Texture containers\PVR\PVRFlag.cs" />
     <Compile Include="ThirdParty\Texture containers\PVR\PVRPixelFormat.cs" />
+    <Compile Include="ThirdParty\Texture converters\DxtDecoder.cs" />
+    <Compile Include="ThirdParty\Texture converters\EtcDecoder.cs" />
     <Compile Include="ThirdParty\Texture converters\PvrtcDecoder.cs" />
+    <Compile Include="ThirdParty\Texture converters\RgbConverter.cs" />
     <Compile Include="ThirdParty\Texture converters\Yuy2Decoder.cs" />
     <Compile Include="Utils\DirectBitmap.cs" />
     <Compile Include="Utils\PermissionValidator.cs" />
@@ -228,9 +227,6 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <None Include="App.manifest">
-      <SubType>Designer</SubType>
-    </None>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -265,14 +261,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <TargetPath>fmod.dll</TargetPath>
     </ContentWithTargetPath>
-    <ContentWithTargetPath Include="Libraries\x86\PVRTexLib.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <TargetPath>PVRTexLib.dll</TargetPath>
-    </ContentWithTargetPath>
-    <ContentWithTargetPath Include="Libraries\x86\PVRTexLibWrapper_x86.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <TargetPath>PVRTexLibWrapper.dll</TargetPath>
-    </ContentWithTargetPath>
     <ContentWithTargetPath Include="Libraries\x86\texgenpack_x86.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <TargetPath>texgenpack.dll</TargetPath>
@@ -298,14 +286,6 @@
     <ContentWithTargetPath Include="Libraries\x64\fmod_x64.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <TargetPath>fmod.dll</TargetPath>
-    </ContentWithTargetPath>
-    <ContentWithTargetPath Include="Libraries\x64\PVRTexLib.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <TargetPath>PVRTexLib.dll</TargetPath>
-    </ContentWithTargetPath>
-    <ContentWithTargetPath Include="Libraries\x64\PVRTexLibWrapper_x64.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <TargetPath>PVRTexLibWrapper.dll</TargetPath>
     </ContentWithTargetPath>
     <ContentWithTargetPath Include="Libraries\x64\texgenpack_x64.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

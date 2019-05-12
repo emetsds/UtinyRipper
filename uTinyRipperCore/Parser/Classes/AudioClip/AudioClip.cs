@@ -23,12 +23,12 @@ namespace uTinyRipper.Classes
 			return version.IsGreaterEqual(5);
 		}
 		/// <summary>
-		/// Greater than 5.0.0b1
+		/// 5.0.0f1 and greater
 		/// </summary>
 		public static bool IsReadIsTrackerFormat(Version version)
 		{
-#warning unknown
-			return version.IsGreater(5, 0, 0, VersionType.Beta, 1);
+			// unknown version
+			return version.IsGreaterEqual(5, 0, 0, VersionType.Final);
 		}
 		/// <summary>
 		/// 2017.1 and greater
@@ -39,20 +39,20 @@ namespace uTinyRipper.Classes
 		}
 
 		/// <summary>
-		/// 5.0.0b1
+		/// 5.0.0b
 		/// </summary>
 		public static bool IsReadAudioClipFlags(Version version)
 		{
-#warning unknown
-			return version.IsEqual(5, 0, 0, VersionType.Beta, 1);
+			// unknown version
+			return version.IsEqual(5, 0, 0, VersionType.Beta);
 		}
 		/// <summary>
-		/// Greater than 5.0.0b1
+		/// 5.0.0f1 and greater
 		/// </summary>
 		public static bool IsReadCompressionFormat(Version version)
 		{
-#warning unknown
-			return version.IsGreater(5, 0, 0, VersionType.Beta, 1);
+			// unknown version
+			return version.IsGreaterEqual(5, 0, 0, VersionType.Final);
 		}
 		/// <summary>
 		/// Not Release
@@ -70,12 +70,12 @@ namespace uTinyRipper.Classes
 			return version.IsGreaterEqual(2) && version.IsLess(3);
 		}
 		/// <summary>
-		/// 2.6.0 to 5.0.0b1
+		/// 2.6.0 to 5.0.0b
 		/// </summary>
 		public static bool IsReadType(Version version)
 		{
-#warning unknown top version
-			return version.IsGreaterEqual(2, 6) && version.IsLessEqual(5, 0, 0, VersionType.Beta, 1);
+			// unknown top version
+			return version.IsGreaterEqual(2, 6) && version.IsLessEqual(5, 0, 0, VersionType.Beta);
 		}
 		/// <summary>
 		/// Less than 2.6.0
@@ -114,21 +114,21 @@ namespace uTinyRipper.Classes
 		}
 
 		/// <summary>
-		/// 5.0.0b1
+		/// 5.0.0b
 		/// </summary>
 		private static bool IsReadFSBResourceFirst(Version version)
 		{
-#warning unknown
-			return version.IsEqual(5, 0, 0, VersionType.Beta, 1);
+			// unknown version
+			return version.IsEqual(5, 0, 0, VersionType.Beta);
 		}
 
 		/// <summary>
-		/// Greater than 5.0.0b1
+		/// 5.0.0f1 and greater
 		/// </summary>
 		private static bool IsAlignTrackerFormat(Version version)
 		{
-#warning unknown
-			return version.IsGreater(5, 0, 0, VersionType.Beta, 1);
+			// unknown version
+			return version.IsGreaterEqual(5, 0, 0, VersionType.Final);
 		}
 
 		/// <summary>
@@ -197,13 +197,41 @@ namespace uTinyRipper.Classes
 		{
 			if (IsReadLoadType(File.Version))
 			{
-				using (ResourcesFile res = File.Collection.FindResourcesFile(File, FSBResource.Source))
+				return FSBResource.CheckIntegrity(File);
+			}
+			else if (IsReadStreamingInfo(File.Version))
+			{
+				if (LoadType == AudioClipLoadType.Streaming)
 				{
-					return res != null;
+					if (m_audioData == null)
+					{
+						return StreamingInfo.CheckIntegrity(File);
+					}
 				}
 			}
-
 			return true;
+		}
+
+		public IReadOnlyList<byte> GetAudioData()
+		{
+			if (IsReadLoadType(File.Version))
+			{
+				return FSBResource.GetContent(File) ?? new byte[0];
+			}
+			else
+			{
+				if (IsReadStreamingInfo(File.Version))
+				{
+					if (LoadType == AudioClipLoadType.Streaming)
+					{
+						if (m_audioData == null)
+						{
+							return StreamingInfo.GetContent(File) ?? new byte[0];
+						}
+					}
+				}
+				return m_audioData;
+			}
 		}
 
 		public override void Read(AssetReader reader)
@@ -315,14 +343,7 @@ namespace uTinyRipper.Classes
 
 				if (IsReadStreamingInfo(reader.Version))
 				{
-					bool isInnerData = true;
-					if (LoadType == AudioClipLoadType.Streaming)
-					{
-						using (ResourcesFile res = File.Collection.FindResourcesFile(File, StreamingFileName))
-						{
-							isInnerData = res == null;
-						}
-					}
+					bool isInnerData = LoadType == AudioClipLoadType.Streaming ? File.Collection.FindResourceFile(StreamingFileName) == null : true;
 					if (isInnerData)
 					{
 						m_audioData = reader.ReadByteArray();
@@ -361,60 +382,28 @@ namespace uTinyRipper.Classes
 		{
 			if (IsReadLoadType(container.Version))
 			{
-				using (ResourcesFile res = File.Collection.FindResourcesFile(File, FSBResource.Source))
+				if (FSBResource.CheckIntegrity(File))
 				{
-					if (res == null)
-					{
-						Logger.Log(LogType.Warning, LogCategory.Export, $"Can't export '{ValidName}' because resources file '{FSBResource.Source}' hasn't been found");
-						return;
-					}
-
-					if (StreamedResource.IsReadSize(container.Version))
-					{
-						using (PartialStream resStream = new PartialStream(res.Stream, res.Offset, res.Size))
-						{
-							resStream.Position = FSBResource.Offset;
-							resStream.CopyStream(stream, FSBResource.Size);
-						}
-					}
-					else
-					{
-						// I think they read data by its type for this verison, so I can't even export raw data :/
-						Logger.Log(LogType.Warning, LogCategory.Export, $"Can't export '{ValidName}' because of unknown size");
-					}
+					byte[] data = FSBResource.GetContent(File);
+					stream.Write(data, 0, data.Length);
+				}
+				else
+				{
+					Logger.Log(LogType.Warning, LogCategory.Export, $"Can't export '{ValidName}' because data can't be read from resources file '{FSBResource.Source}'");
 				}
 			}
 			else
 			{
-				if (IsReadStreamingInfo(container.Version))
+				if (IsReadStreamingInfo(container.Version) && LoadType == AudioClipLoadType.Streaming && m_audioData == null)
 				{
-					if (LoadType == AudioClipLoadType.Streaming)
+					if (StreamingInfo.CheckIntegrity(File))
 					{
-						if (m_audioData == null)
-						{
-							using (ResourcesFile res = File.Collection.FindResourcesFile(File, StreamingInfo.Path))
-							{
-								if (res == null)
-								{
-									Logger.Log(LogType.Warning, LogCategory.Export, $"Can't export '{ValidName}' because resources file '{StreamingInfo.Path}' hasn't been found");
-									return;
-								}
-
-								using (PartialStream resStream = new PartialStream(res.Stream, res.Offset, res.Size))
-								{
-									resStream.Position = StreamingInfo.Offset;
-									resStream.CopyStream(stream, StreamingInfo.Size);
-								}
-							}
-						}
-						else
-						{
-							stream.Write(m_audioData, 0, m_audioData.Length);
-						}
+						byte[] data = StreamingInfo.GetContent(File);
+						stream.Write(data, 0, data.Length);
 					}
 					else
 					{
-						stream.Write(m_audioData, 0, m_audioData.Length);
+						Logger.Log(LogType.Warning, LogCategory.Export, $"Can't export '{ValidName}' because resources file '{StreamingInfo.Path}' hasn't been found");
 					}
 				}
 				else

@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace uTinyRipper
 {
@@ -65,7 +68,7 @@ namespace uTinyRipper
 #if VIRTUAL
 			return new MemoryStream();
 #else
-			return Open(ToLongPath(path), FileMode.CreateNew, FileAccess.Write);
+			return Open(path, FileMode.CreateNew, FileAccess.Write);
 #endif
 		}
 
@@ -76,7 +79,7 @@ namespace uTinyRipper
 
 		public static string ToLongPath(string path)
 		{
-			if(path.StartsWith(DirectoryUtils.LongPathPrefix, StringComparison.Ordinal))
+			if (path.StartsWith(DirectoryUtils.LongPathPrefix, StringComparison.Ordinal))
 			{
 				return path;
 			}
@@ -95,14 +98,65 @@ namespace uTinyRipper
 				fileName = fileName.Substring(0, MaxFileNameLength - extension.Length - 1);
 				return Path.Combine(directory, fileName + extension);
 			}
-			else if (index >= DirectoryUtils.MaxDirectoryLength)
+			else if (fullPath.Length >= MaxFilePathLength)
 			{
-				// directory name is too long. just append prefix
+				// name is ok but whole path is too long. just add a prefix
 				return $"{DirectoryUtils.LongPathPrefix}{fullPath}";
 			}
 			return path;
 		}
 
+		public static string GetUniqueName(string dirPath, string fileName)
+		{
+			dirPath = DirectoryUtils.ToLongPath(dirPath);
+			if (!Directory.Exists(dirPath))
+			{
+				return fileName;
+			}
+
+			string filePath = ToLongPath(Path.Combine(dirPath, fileName));
+			if (!File.Exists(filePath))
+			{
+				return fileName;
+			}
+
+			string name = Path.GetFileNameWithoutExtension(fileName);
+			string ext = Path.GetExtension(fileName);
+			int maxLength = MaxFileNameLength - ext.Length - 4;
+			if (name.Length > maxLength)
+			{
+				name = name.Substring(0, maxLength);
+			}
+
+			string escapedName = Regex.Escape(name);
+			List<string> files = new List<string>();
+			DirectoryInfo dirInfo = new DirectoryInfo(DirectoryUtils.ToLongPath(dirPath, true));
+			Regex regex = new Regex($@"(?i)^{escapedName}(_[\d]+)?\.[^\.]+$");
+			foreach (FileInfo fileInfo in dirInfo.EnumerateFiles($"{name}_*{ext}"))
+			{
+				if (regex.IsMatch(fileInfo.Name))
+				{
+					files.Add(fileInfo.Name.ToLower());
+				}
+			}
+			if (files.Count == 0)
+			{
+				return $"{name}_0{ext}";
+			}
+
+			string lowName = name.ToLower();
+			for (int i = 1; i < int.MaxValue; i++)
+			{
+				string newName = $"{lowName}_{i}.";
+				if (files.All(t => !t.StartsWith(newName, StringComparison.Ordinal)))
+				{
+					return $"{name}_{i}{ext}";
+				}
+			}
+			throw new Exception($"Can't generate unique name for file {fileName} in directory {dirPath}");
+		}
+
 		public const int MaxFileNameLength = 256;
+		public const int MaxFilePathLength = 260;
 	}
 }

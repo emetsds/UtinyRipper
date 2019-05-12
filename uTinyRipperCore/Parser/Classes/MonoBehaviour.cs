@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using uTinyRipper.Assembly;
 using uTinyRipper.AssetExporters;
+using uTinyRipper.Classes.Objects;
 using uTinyRipper.SerializedFiles;
 using uTinyRipper.YAML;
 
@@ -14,14 +15,50 @@ namespace uTinyRipper.Classes
 		{
 		}
 
+		public static bool IsReadEditorHideFlags(Version version, TransferInstructionFlags flags)
+		{
+#warning unknown version
+			return !flags.IsRelease();
+		}
+		/// <summary>
+		/// 2019.1 to 2019.1.0b4 exclusive and Not Release
+		/// </summary>
+		public static bool IsReadGeneratorAsset(Version version, TransferInstructionFlags flags)
+		{
+			return !flags.IsRelease() && version.IsGreaterEqual(2019) && version.IsLess(2019, 1, 0, VersionType.Beta, 4);
+		}
+		public static bool IsReadEditorClassIdentifier(Version version, TransferInstructionFlags flags)
+		{
+#warning unknown version
+			return !flags.IsRelease();
+		}
+
 		public override void Read(AssetReader reader)
 		{
 			long position = reader.BaseStream.Position;
 			base.Read(reader);
 
+#if UNIVERSAL
+			if (IsReadEditorHideFlags(reader.Version, reader.Flags))
+			{
+				EditorHideFlags = (HideFlags)reader.ReadUInt32();
+			}
+			if (IsReadGeneratorAsset(reader.Version, reader.Flags))
+			{
+				GeneratorAsset.Read(reader);
+			}
+#endif
+
 			Script.Read(reader);
 			Name = reader.ReadString();
-			
+
+#if UNIVERSAL
+			if (IsReadEditorClassIdentifier(reader.Version, reader.Flags))
+			{
+				EditorClassIdentifier = reader.ReadString();
+			}
+#endif
+
 			MonoScript script = Script.FindAsset(File);
 			if (script != null)
 			{
@@ -34,7 +71,7 @@ namespace uTinyRipper.Classes
 			}
 
 			AssetEntry info = File.GetAssetEntry(PathID);
-			reader.BaseStream.Position = position + info.DataSize;
+			reader.BaseStream.Position = position + info.Size;
 		}
 
 		public override IEnumerable<Object> FetchDependencies(ISerializedFile file, bool isLog = false)
@@ -44,6 +81,9 @@ namespace uTinyRipper.Classes
 				yield return asset;
 			}
 
+#if UNIVERSAL
+			yield return GeneratorAsset.FindAsset(file);
+#endif
 			yield return Script.FindAsset(file);
 			
 			if(Structure != null)
@@ -60,27 +100,17 @@ namespace uTinyRipper.Classes
 			return $"{Name}({nameof(MonoBehaviour)})";
 		}
 
-		/// <summary>
-		/// Whether this MonoBeh belongs to scene/prefab hierarchy or not
-		/// </summary>
-		public bool IsSceneObject()
-		{
-			// TODO: find out why GameObject may has value like PPtr(0, 894) but such game object doesn't exists
-			return GameObject.FindAsset(File) != null;
-		}
-
-		public bool IsScriptableObject()
-		{
-			return Name != string.Empty;
-		}
-
 		protected override YAMLMappingNode ExportYAMLRoot(IExportContainer container)
 		{
 			YAMLMappingNode node = base.ExportYAMLRoot(container);
-			node.Add(EditorHideFlagsName, false);
+			node.Add(EditorHideFlagsName, (uint)GetEditorHideFlags(container.Version, container.Flags));
+			if (IsReadGeneratorAsset(container.ExportVersion, container.ExportFlags))
+			{
+				node.Add(GeneratorAssetName, GetGeneratorAsset(container.Version, container.Flags).ExportYAML(container));
+			}
 			node.Add(ScriptName, Script.ExportYAML(container));
 			node.Add(NameName, Name);
-			node.Add(EditorClassIdentifierName, string.Empty);
+			node.Add(EditorClassIdentifierName, GetEditorClassIdentifier(container.Version, container.Flags));
 			if (Structure != null)
 			{
 				YAMLMappingNode structureNode = (YAMLMappingNode)Structure.ExportYAML(container);
@@ -89,17 +119,65 @@ namespace uTinyRipper.Classes
 			return node;
 		}
 
+		private HideFlags GetEditorHideFlags(Version version, TransferInstructionFlags flags)
+		{
+#if UNIVERSAL
+			if (IsReadEditorHideFlags(version, flags))
+			{
+				return EditorHideFlags;
+			}
+#endif
+			return HideFlags.None;
+		}
+		private PPtr<Object> GetGeneratorAsset(Version version, TransferInstructionFlags flags)
+		{
+#if UNIVERSAL
+			if (IsReadGeneratorAsset(version, flags))
+			{
+				return GeneratorAsset;
+			}
+#endif
+			return default;
+		}
+		private string GetEditorClassIdentifier(Version version, TransferInstructionFlags flags)
+		{
+#if UNIVERSAL
+			if (IsReadEditorClassIdentifier(version, flags))
+			{
+				return EditorClassIdentifier;
+			}
+#endif
+			return string.Empty;
+		}
+
 		public override string ExportName => Path.Combine(AssetsKeyWord, "ScriptableObject");
 		public override string ExportExtension => AssetExtension;
 
+		/// <summary>
+		/// Whether this MonoBeh belongs to scene/prefab hierarchy or not
+		/// </summary>
+		// TODO: find out why GameObject may has value like PPtr(0, 894) but such game object doesn't exists
+		public bool IsSceneObject => !GameObject.IsNull;
+		public bool IsScriptableObject => Name != string.Empty;
+
+#if UNIVERSAL
+		public HideFlags EditorHideFlags { get; private set; }
+#endif
 		public string Name { get; private set; }
 		public ScriptStructure Structure { get; private set; }
+#if UNIVERSAL
+		public string EditorClassIdentifier { get; private set; }
+#endif
 
 		public const string EditorHideFlagsName = "m_EditorHideFlags";
+		public const string GeneratorAssetName = "m_GeneratorAsset";
 		public const string ScriptName = "m_Script";
 		public const string NameName = "m_Name";
 		public const string EditorClassIdentifierName = "m_EditorClassIdentifier";
 
+#if UNIVERSAL
+		public PPtr<Object> GeneratorAsset;
+#endif
 		public PPtr<MonoScript> Script;
 	}
 }

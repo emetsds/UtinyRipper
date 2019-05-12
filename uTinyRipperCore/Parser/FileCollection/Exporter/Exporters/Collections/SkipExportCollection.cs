@@ -8,7 +8,7 @@ using Object = uTinyRipper.Classes.Object;
 
 namespace uTinyRipper.AssetExporters
 {
-	public class SkipExportCollection : IExportCollection
+	public sealed class SkipExportCollection : IExportCollection
 	{
 		public SkipExportCollection(IAssetExporter assetExporter, Object asset)
 		{
@@ -22,7 +22,6 @@ namespace uTinyRipper.AssetExporters
 			}
 
 			AssetExporter = assetExporter;
-			Name = asset.GetType().Name;
 			m_asset = asset;
 		}
 
@@ -45,7 +44,7 @@ namespace uTinyRipper.AssetExporters
 			throw new ArgumentException(nameof(asset));
 		}
 
-		public EngineGUID GetExportGUID(Object asset)
+		public EngineGUID GetExportGUID(Object _)
 		{
 			throw new NotSupportedException();
 		}
@@ -69,7 +68,7 @@ namespace uTinyRipper.AssetExporters
 		{
 			get { yield return m_asset; }
 		}
-		public string Name { get; }
+		public string Name => m_asset.GetType().Name;
 		public IAssetImporter MetaImporter => throw new NotSupportedException();
 
 		private readonly Object m_asset;

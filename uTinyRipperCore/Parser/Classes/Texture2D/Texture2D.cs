@@ -57,7 +57,7 @@ namespace uTinyRipper.Classes
 		/// </summary>
 		public static bool IsReadAlphaIsTransparency(Version version, TransferInstructionFlags flags)
 		{
-			return version.IsGreaterEqual(4, 2) && !flags.IsRelease();
+			return !flags.IsRelease() && version.IsGreaterEqual(4, 2);
 		}
 		/// <summary>
 		/// 3.0.0 and greater
@@ -101,11 +101,21 @@ namespace uTinyRipper.Classes
 		}
 
 		/// <summary>
-		/// Less than 5.0.0
+		/// <para>0 - less than 5.0.0</para>
+		/// <para>1 - less than 2018.2</para>
+		/// <para>2 - 2018.2 and greater</para>
 		/// </summary>
-		private static bool IsReadAlphaIsTransparencyFirst(Version version)
+		private static int GetAlphaIsTransparencyPosition(Version version)
 		{
-			return version.IsLess(5);
+			if (version.IsLess(5))
+			{
+				return 0;
+			}
+			if (version.IsLess(2018, 2))
+			{
+				return 1;
+			}
+			return 2;
 		}
 
 		private static int GetSerializedVersion(Version version)
@@ -122,50 +132,30 @@ namespace uTinyRipper.Classes
 		{
 			if (IsReadStreamData(File.Version))
 			{
-				string resourcePath = StreamData.Path;
-				if (resourcePath == string.Empty)
-				{
-					return true;
-				}
-
-				using (ResourcesFile res = File.Collection.FindResourcesFile(File, resourcePath))
-				{
-					return res != null;
-				}
+				return StreamData.CheckIntegrity(File);
 			}
 			return true;
 		}
 
-		public IReadOnlyList<byte> GetImageData(Version version)
+		public IReadOnlyList<byte> GetImageData()
 		{
-			if (IsReadStreamData(version))
+			byte[] data = m_imageData;
+			if (IsReadStreamData(File.Version) && StreamData.IsValid)
 			{
-				string path = StreamData.Path;
-				if (path != string.Empty)
-				{
-					if (m_imageData.Length != 0)
-					{
-						throw new Exception("Texture2D contains both data and resource path");
-					}
+				data = StreamData.GetContent(File) ?? m_imageData;
+			}
 
-					using (ResourcesFile res = File.Collection.FindResourcesFile(File, path))
-					{
-						if (res != null)
-						{
-							using (PartialStream resStream = new PartialStream(res.Stream, res.Offset, res.Size))
-							{
-								resStream.Position = StreamData.Offset;
-								using (BinaryReader reader = new BinaryReader(resStream))
-								{
-									return reader.ReadBytes((int)StreamData.Size);
-								}
-							}
-						}
-					}
+			if (IsSwapBytes(File.Platform, TextureFormat))
+			{
+				for (int i = 0; i < data.Length; i += 2)
+				{
+					byte b = data[i];
+					data[i] = data[i + 1];
+					data[i + 1] = b;
 				}
 			}
 
-			return m_imageData;
+			return data;
 		}
 
 		public override void Read(AssetReader reader)
@@ -175,7 +165,7 @@ namespace uTinyRipper.Classes
 #if UNIVERSAL
 			if (IsReadAlphaIsTransparency(reader.Version, reader.Flags))
 			{
-				if (IsReadAlphaIsTransparencyFirst(reader.Version))
+				if (GetAlphaIsTransparencyPosition(reader.Version) == 0)
 				{
 					AlphaIsTransparency = reader.ReadBoolean();
 					reader.AlignStream(AlignType.Align4);
@@ -217,22 +207,32 @@ namespace uTinyRipper.Classes
 			{
 				StreamingMipmaps = reader.ReadBoolean();
 			}
+#if UNIVERSAL
+			if (IsReadAlphaIsTransparency(reader.Version, reader.Flags))
+			{
+				if (GetAlphaIsTransparencyPosition(reader.Version) == 1)
+				{
+					AlphaIsTransparency = reader.ReadBoolean();
+				}
+			}
+#endif
 			reader.AlignStream(AlignType.Align4);
 
 			if (IsReadStreamingMipmapsPriority(reader.Version))
 			{
 				StreamingMipmapsPriority = reader.ReadInt32();
-			}
 #if UNIVERSAL
-			if (IsReadAlphaIsTransparency(reader.Version, reader.Flags))
-			{
-				if (!IsReadAlphaIsTransparencyFirst(reader.Version))
+				if (IsReadAlphaIsTransparency(reader.Version, reader.Flags))
 				{
-					AlphaIsTransparency = reader.ReadBoolean();
-					reader.AlignStream(AlignType.Align4);
+					if (GetAlphaIsTransparencyPosition(reader.Version) == 2)
+					{
+						AlphaIsTransparency = reader.ReadBoolean();
+					}
 				}
-			}
 #endif
+				reader.AlignStream(AlignType.Align4);
+			}
+
 			ImageCount = reader.ReadInt32();
 			TextureDimension = (TextureDimension)reader.ReadInt32();
 			TextureSettings.Read(reader);
@@ -278,7 +278,7 @@ namespace uTinyRipper.Classes
 			node.Add(TextureSettingsName, TextureSettings.ExportYAML(container));
 			node.Add(LightmapFormatName, (int)LightmapFormat);
 			node.Add(ColorSpaceName, (int)ColorSpace);
-			IReadOnlyList<byte> imageData = GetExportImageData(container.Version);
+			IReadOnlyList<byte> imageData = GetExportImageData();
 			node.Add(ImageDataName, imageData.Count);
 			node.Add(TypelessdataName, imageData.ExportYAML());
 			StreamingInfo streamData = new StreamingInfo(true);
@@ -294,17 +294,15 @@ namespace uTinyRipper.Classes
 			return true;
 #endif
 		}
-		private IReadOnlyList<byte> GetExportImageData(Version version)
+		private IReadOnlyList<byte> GetExportImageData()
 		{
 			if (CheckAssetIntegrity())
 			{
-				return GetImageData(version);
+				return GetImageData();
 			}
-			else
-			{
-				Logger.Log(LogType.Warning, LogCategory.Export, $"Can't export '{ValidName}' because resources file '{StreamData.Path}' wasn't found");
-				return new byte[0];
-			}
+
+			Logger.Log(LogType.Warning, LogCategory.Export, $"Can't export '{ValidName}' because resources file '{StreamData.Path}' wasn't found");
+			return new byte[0];
 		}
 
 		public bool IsValidData

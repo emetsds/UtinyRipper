@@ -60,6 +60,8 @@ namespace uTinyRipper
 					return new OcclusionPortal(assetInfo);
 				case ClassIDType.Mesh:
 					return new Mesh(assetInfo);
+				case ClassIDType.Skybox:
+					return new Skybox(assetInfo);
 				case ClassIDType.QualitySettings:
 					return new QualitySettings(assetInfo);
 				case ClassIDType.Shader:
@@ -134,6 +136,10 @@ namespace uTinyRipper
 					return new NavMeshProjectSettings(assetInfo);
 				case ClassIDType.Font:
 					return new Font(assetInfo);
+				case ClassIDType.GUITexture:
+					return new GUITexture(assetInfo);
+				case ClassIDType.GUIText:
+					return new GUIText(assetInfo);
 				case ClassIDType.PhysicMaterial:
 					return new PhysicMaterial(assetInfo);
 				case ClassIDType.SphereCollider:
@@ -166,8 +172,14 @@ namespace uTinyRipper
 					return new LightmapSettings(assetInfo);
 				case ClassIDType.AudioReverbZone:
 					return new AudioReverbZone(assetInfo);
+				case ClassIDType.OffMeshLink:
+					return new OffMeshLink(assetInfo);
 				case ClassIDType.OcclusionArea:
 					return new OcclusionArea(assetInfo);
+				case ClassIDType.NavMeshObsolete:
+					return new NavMesh(assetInfo);
+				case ClassIDType.NavMeshAgent:
+					return new NavMeshAgent(assetInfo);
 				case ClassIDType.NavMeshSettings:
 					return new NavMeshSettings(assetInfo);
 				case ClassIDType.ParticleSystem:
@@ -178,10 +190,16 @@ namespace uTinyRipper
 					return new ShaderVariantCollection(assetInfo);
 				case ClassIDType.LODGroup:
 					return new LODGroup(assetInfo);
+				case ClassIDType.NavMeshObstacle:
+					return new NavMeshObstacle(assetInfo);
+				case ClassIDType.SortingGroup:
+					return new SortingGroup(assetInfo);
 				case ClassIDType.SpriteRenderer:
 					return new SpriteRenderer(assetInfo);
 				case ClassIDType.Sprite:
 					return new Sprite(assetInfo);
+				case ClassIDType.ReflectionProbe:
+					return new ReflectionProbe(assetInfo);
 				case ClassIDType.Terrain:
 					return new Terrain(assetInfo);
 				case ClassIDType.AnimatorOverrideController:
@@ -192,6 +210,8 @@ namespace uTinyRipper
 					return new Canvas(assetInfo);
 				case ClassIDType.RectTransform:
 					return new RectTransform(assetInfo);
+				case ClassIDType.CanvasGroup:
+					return new CanvasGroup(assetInfo);
 				case ClassIDType.ClusterInputManager:
 					return new ClusterInputManager(assetInfo);
 				case ClassIDType.NavMeshData:

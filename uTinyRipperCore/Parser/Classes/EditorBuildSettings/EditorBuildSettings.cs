@@ -30,7 +30,7 @@ namespace uTinyRipper.Classes
 
 		private static bool IsReadScenes(Version version)
 		{
-#warning unknown
+			// unknown version
 			return version.IsGreaterEqual(2, 5);
 		}
 
@@ -41,8 +41,9 @@ namespace uTinyRipper.Classes
 				return 2;
 			}
 
+			// unknown version
 			// KeyValuePairs to Scene class
-			if (IsReadScenes(version))
+			if (version.IsGreaterEqual(2, 5))
 			{
 				return 2;
 			}
@@ -56,6 +57,7 @@ namespace uTinyRipper.Classes
 				throw new ArgumentNullException(nameof(scenes));
 			}
 			m_scenes = scenes.ToArray();
+			m_configObjects = new Dictionary<string, PPtr<Object>>();
 		}
 
 		public override void Read(AssetReader reader)
@@ -71,7 +73,7 @@ namespace uTinyRipper.Classes
 				Tuple<bool, string>[] scenes = reader.ReadTupleBoolStringArray();
 				m_scenes = scenes.Select(t => new Scene(t.Item1, t.Item2)).ToArray();
 			}
-			if(IsReadConfigObjects(reader.Version))
+			if (IsReadConfigObjects(reader.Version))
 			{
 				m_configObjects = new Dictionary<string, PPtr<Object>>();
 				m_configObjects.Read(reader);
@@ -82,14 +84,24 @@ namespace uTinyRipper.Classes
 		{
 			YAMLMappingNode node = base.ExportYAMLRoot(container);
 			node.AddSerializedVersion(GetSerializedVersion(container.Version));
-			node.Add("m_Scenes", Scenes.ExportYAML(container));
-#warning TODO: 2018
-			//node.Add("m_configObjects", ConfigObjects.ExportYAML(container));
+			node.Add(ScenesName, Scenes.ExportYAML(container));
+			if (IsReadConfigObjects(container.ExportVersion))
+			{
+				node.Add(ConfigObjectsName, GetConfigObjects(container.Version).ExportYAML(container));
+			}
 			return node;
+		}
+
+		private IReadOnlyDictionary<string, PPtr<Object>> GetConfigObjects(Version version)
+		{
+			return IsReadConfigObjects(version) ? ConfigObjects : new Dictionary<string, PPtr<Object>>(0);
 		}
 
 		public IReadOnlyList<Scene> Scenes => m_scenes;
 		public IReadOnlyDictionary<string, PPtr<Object>> ConfigObjects => m_configObjects;
+
+		public const string ScenesName = "m_Scenes";
+		public const string ConfigObjectsName = "m_configObjects";
 
 		private Scene[] m_scenes;
 		private Dictionary<string, PPtr<Object>> m_configObjects;

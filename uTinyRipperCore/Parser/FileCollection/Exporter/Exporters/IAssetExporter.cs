@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using uTinyRipper.SerializedFiles;
 
@@ -8,11 +8,11 @@ namespace uTinyRipper.AssetExporters
 {
 	public interface IAssetExporter
 	{
-		bool IsHandle(Object asset);
+		bool IsHandle(Object asset, ExportOptions options);
 
-		void Export(IExportContainer container, Object asset, string path);
+		bool Export(IExportContainer container, Object asset, string path);
 		void Export(IExportContainer container, Object asset, string path, Action<IExportContainer, Object, string> callback);
-		void Export(IExportContainer container, IEnumerable<Object> assets, string path);
+		bool Export(IExportContainer container, IEnumerable<Object> assets, string path);
 		void Export(IExportContainer container, IEnumerable<Object> assets, string path, Action<IExportContainer, Object, string> callback);
 
 		IExportCollection CreateCollection(VirtualSerializedFile virtualFile, Object asset, List<Object> depList);

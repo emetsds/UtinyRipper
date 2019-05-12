@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.IO;
 using uTinyRipper.AssetExporters.Classes;
 using uTinyRipper.Classes;
 using uTinyRipper.Classes.SpriteAtlases;
@@ -8,19 +7,16 @@ namespace uTinyRipper.AssetExporters
 {
 	public class TextureExportCollection : AssetsExportCollection
 	{
-		public TextureExportCollection(
-            IAssetExporter assetExporter,
-            Texture2D texture,
-            bool convert,
-            List<Object> depList):
+#warning TODO: optimize (now it is suuuuuuuuper slow)
+		public TextureExportCollection(IAssetExporter assetExporter, Texture2D texture, bool convert):
 			base(assetExporter, texture, CreateImporter(texture, convert))
 		{
 			m_convert = convert;
 			if (convert)
 			{
 				TextureImporter textureImporter = (TextureImporter)MetaImporter;
-				List<Sprite> sprites = new List<Sprite>();
-				foreach (Object asset in depList)
+				Dictionary<Sprite, SpriteAtlas> sprites = new Dictionary<Sprite, SpriteAtlas>();
+				foreach (Object asset in texture.File.Collection.FetchAssets())
 				{
 					switch (asset.ClassID)
 					{
@@ -29,7 +25,8 @@ namespace uTinyRipper.AssetExporters
 								Sprite sprite = (Sprite)asset;
 								if (sprite.RD.Texture.IsAsset(sprite.File, texture))
 								{
-									sprites.Add(sprite);
+									SpriteAtlas atlas = Sprite.IsReadRendererData(sprite.File.Version) ? sprite.SpriteAtlas.FindAsset(sprite.File) : null;
+									sprites.Add(sprite, atlas);
 									AddAsset(sprite);
 								}
 							}
@@ -37,38 +34,36 @@ namespace uTinyRipper.AssetExporters
 
 						case ClassIDType.SpriteAtlas:
 							{
-								int index = 0;
 								SpriteAtlas atlas = (SpriteAtlas)asset;
-								foreach (SpriteAtlasData atlasData in atlas.RenderDataMap.Values)
+								foreach (PPtr<Sprite> spritePtr in atlas.PackedSprites)
 								{
-									if (atlasData.Texture.IsAsset(atlas.File, texture))
+									Sprite sprite = spritePtr.FindAsset(atlas.File);
+									if (sprite != null)
 									{
-										Sprite sprite = atlas.PackedSprites[index].GetAsset(atlas.File);
-										sprites.Add(sprite);
-										AddAsset(sprite);
+										SpriteAtlasData atlasData = atlas.RenderDataMap[sprite.RenderDataKey];
+										if (atlasData.Texture.IsAsset(atlas.File, texture))
+										{
+											sprites.Add(sprite, atlas);
+											AddAsset(sprite);
+										}
 									}
-									index++;
 								}
 							}
 							break;
 					}
 				}
-                //TODO: sort then call AddAsset for proper ids
 				textureImporter.Sprites = sprites;
 			}
 		}
 
-		public static IExportCollection CreateExportCollection(
-            IAssetExporter assetExporter,
-            Sprite asset,
-            List<Object> depList)
+		public static IExportCollection CreateExportCollection(IAssetExporter assetExporter, Sprite asset)
 		{
 			Texture2D texture = asset.RD.Texture.FindAsset(asset.File);
 			if (texture == null)
 			{
-				return new SkipExportCollection(assetExporter, asset);
+				return new FailExportCollection(assetExporter, asset);
 			}
-			return new TextureExportCollection(assetExporter, texture, true, depList);
+			return new TextureExportCollection(assetExporter, texture, true);
 		}
 
 		private static IAssetImporter CreateImporter(Texture2D texture, bool convert)
@@ -83,16 +78,18 @@ namespace uTinyRipper.AssetExporters
 			}
 		}
 
-		protected override string ExportInner(ProjectAssetContainer container, string filePath)
+		protected override bool ExportInner(ProjectAssetContainer container, string filePath)
 		{
-			if(m_convert)
+			return AssetExporter.Export(container, Asset, filePath);
+		}
+
+		protected override string GetExportExtension(Object asset)
+		{
+			if (m_convert)
 			{
-				string dirPath = Path.GetDirectoryName(filePath);
-				string fileName = Path.GetFileNameWithoutExtension(filePath);
-				filePath = $"{Path.Combine(dirPath, fileName)}.png";
+				return "png";
 			}
-			AssetExporter.Export(container, Asset, filePath);
-			return filePath;
+			return base.GetExportExtension(asset);
 		}
 
 		protected override long GenerateExportID(Object asset)

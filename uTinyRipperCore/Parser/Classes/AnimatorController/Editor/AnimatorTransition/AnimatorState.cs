@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using uTinyRipper.AssetExporters;
 using uTinyRipper.YAML;
 using uTinyRipper.SerializedFiles;
+using uTinyRipper.Classes.Objects;
 
 namespace uTinyRipper.Classes.AnimatorControllers.Editor
 {
 	public sealed class AnimatorState : NamedObject
 	{
 		private AnimatorState(AssetInfo assetInfo, AnimatorController controller, int stateMachineIndex, int stateIndex, Vector3f position) :
-			base(assetInfo, 1)
+			base(assetInfo, HideFlags.HideInHierarchy)
 		{
 			VirtualSerializedFile virtualFile = (VirtualSerializedFile)assetInfo.File;
 			
@@ -58,7 +59,7 @@ namespace uTinyRipper.Classes.AnimatorControllers.Editor
 
 		private static int GetSerializedVersion(Version version)
 		{
-#warning TODO: serialized version acording to read version (current 2017.3.0f3)
+			// TODO:
 			return 5;
 		}
 		
@@ -70,7 +71,7 @@ namespace uTinyRipper.Classes.AnimatorControllers.Editor
 		protected override YAMLMappingNode ExportYAMLRoot(IExportContainer container)
 		{
 			YAMLMappingNode node = base.ExportYAMLRoot(container);
-			node.InsertSerializedVersion(GetSerializedVersion(container.Version));
+			node.InsertSerializedVersion(GetSerializedVersion(container.ExportVersion));
 			node.Add("m_Speed", Speed);
 			node.Add("m_CycleOffset", CycleOffset);
 			node.Add("m_Transitions", Transitions.ExportYAML(container));

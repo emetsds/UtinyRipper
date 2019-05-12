@@ -112,6 +112,9 @@ namespace uTinyRipper.Classes.Shaders
 		{
 			switch(_this)
 			{
+				case ShaderGpuProgramType.Unknown:
+					return GPUPlatform.unknown;
+
 				case ShaderGpuProgramType.GLES:
 					return GPUPlatform.gles;
 
@@ -168,8 +171,8 @@ namespace uTinyRipper.Classes.Shaders
 							return GPUPlatform.xbox360;
 						case Platform.XboxOne:
 							return GPUPlatform.xboxone;
-#warning TODO:
-							//return GPUPlatform.xboxone_d3d12;
+						// TODO:
+						//return GPUPlatform.xboxone_d3d12;
 
 						case Platform.WiiU:
 							return GPUPlatform.wiiu;
@@ -183,6 +186,7 @@ namespace uTinyRipper.Classes.Shaders
 						case Platform.Flash:
 							return GPUPlatform.flash;
 
+						case Platform.NoTarget:
 						case Platform.StandaloneWinPlayer:
 						case Platform.StandaloneWin64Player:
 						case Platform.StandaloneLinux:
@@ -198,9 +202,16 @@ namespace uTinyRipper.Classes.Shaders
 							throw new NotSupportedException($"Unsupported console platform {platform}");
 					}
 
+				// TODO: unknown
 				case ShaderGpuProgramType.PSVertex:
 				case ShaderGpuProgramType.PSPixel:
-					return GPUPlatform.ps4;
+					{
+						if (platform == Platform.Switch)
+						{
+							return GPUPlatform.@switch;
+						}
+						return GPUPlatform.ps4;
+					}
 
 				default:
 					throw new NotSupportedException($"Unsupported gpu program type {_this}");
@@ -211,6 +222,9 @@ namespace uTinyRipper.Classes.Shaders
 		{
 			switch (_this)
 			{
+				case ShaderGpuProgramType.Unknown:
+					return nameof(ShaderGpuProgramType.Unknown);
+
 				case ShaderGpuProgramType.GLES:
 					return "!!GLES";
 				case ShaderGpuProgramType.GLES3:

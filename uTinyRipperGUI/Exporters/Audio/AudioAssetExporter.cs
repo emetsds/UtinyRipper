@@ -13,19 +13,14 @@ namespace uTinyRipperGUI.Exporters
 {
 	public class AudioAssetExporter : IAssetExporter
 	{
-		public static bool ExportAudio(IExportContainer container, AudioClip audioClip, Stream exportStream)
+		public static byte[] ExportAudio(AudioClip audioClip)
 		{
-			using (MemoryStream memStream = new MemoryStream())
+			byte[] data = (byte[])audioClip.GetAudioData();
+			if (data.Length == 0)
 			{
-				audioClip.ExportBinary(container, memStream);
-				if (memStream.Length == 0)
-				{
-					return false;
-				}
-
-				byte[] data = memStream.ToArray();
-				return AudioConverter.ConvertToWav(data, exportStream);
+				return null;
 			}
+			return AudioConverter.ConvertToWav(data);
 		}
 
 		public static bool IsSupported(AudioClip audioClip)
@@ -67,7 +62,7 @@ namespace uTinyRipperGUI.Exporters
 			}
 		}
 
-		public bool IsHandle(Object asset)
+		public bool IsHandle(Object asset, ExportOptions options)
 		{
 			return true;
 		}
@@ -77,33 +72,48 @@ namespace uTinyRipperGUI.Exporters
 			return new AudioExportCollection(this, (AudioClip)asset);
 		}
 
-		public void Export(IExportContainer container, Object asset, string path)
-		{
-			Export(container, asset, path, null);
-		}
-
-		public void Export(IExportContainer container, Object asset, string path, Action<IExportContainer, Object, string> callback)
+		public bool Export(IExportContainer container, Object asset, string path)
 		{
 			AudioClip audioClip = (AudioClip)asset;
-			using (Stream fileStream = FileUtils.CreateVirtualFile(path))
+			if (!audioClip.CheckAssetIntegrity())
 			{
-				if (IsSupported(audioClip))
+				Logger.Log(LogType.Warning, LogCategory.Export, $"Can't export '{audioClip.Name}' because resources file hasn't been found");
+				return false;
+			}
+
+			if (IsSupported(audioClip))
+			{
+				byte[] data = ExportAudio(audioClip);
+				if (data == null)
 				{
-					bool result = ExportAudio(container, audioClip, fileStream);
-					if (!result)
-					{
-						Logger.Log(LogType.Warning, LogCategory.Export, $"Unable to convert '{audioClip.Name}' to wav");
-					}
+					Logger.Log(LogType.Warning, LogCategory.Export, $"Unable to convert '{audioClip.ValidName}' to wav");
+					return false;
 				}
-				else
+
+				using (Stream fileStream = FileUtils.CreateVirtualFile(path))
+				{
+					fileStream.Write(data, 0, data.Length);
+				}
+			}
+			else
+			{
+				using (Stream fileStream = FileUtils.CreateVirtualFile(path))
 				{
 					audioClip.ExportBinary(container, fileStream);
 				}
 			}
-			callback?.Invoke(container, asset, path);
+			return true;
 		}
 
-		public void Export(IExportContainer container, IEnumerable<Object> assets, string path)
+		public void Export(IExportContainer container, Object asset, string path, Action<IExportContainer, Object, string> callback)
+		{
+			if (Export(container, asset, path))
+			{
+				callback?.Invoke(container, asset, path);
+			}
+		}
+
+		public bool Export(IExportContainer container, IEnumerable<Object> assets, string path)
 		{
 			throw new NotSupportedException();
 		}

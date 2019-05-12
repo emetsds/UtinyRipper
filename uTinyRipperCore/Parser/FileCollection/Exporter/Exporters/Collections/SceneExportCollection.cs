@@ -32,7 +32,7 @@ namespace uTinyRipper.AssetExporters
 			{
 				if (OcclusionCullingSettings.IsSceneCompatible(asset))
 				{
-					AddComponent(file, asset);
+					m_cexportIDs.Add(asset, asset.PathID);
 				}
 			}
 			m_cexportIDs = m_cexportIDs.OrderBy(t => t.Key, this).ToDictionary(t => t.Key, t => t.Value);
@@ -114,7 +114,7 @@ namespace uTinyRipper.AssetExporters
 
 		public override bool Export(ProjectAssetContainer container, string dirPath)
 		{
-			string folderPath = Path.Combine(dirPath, Object.AssetsKeyWord, OcclusionCullingSettings.SceneKeyWord);
+			string folderPath = Path.Combine(dirPath, Object.AssetsKeyWord, OcclusionCullingSettings.SceneKeyword);
 			string sceneSubPath = GetSceneName(container);
 			string fileName = $"{sceneSubPath}.unity";
 			string filePath = Path.Combine(folderPath, fileName);
@@ -152,7 +152,7 @@ namespace uTinyRipper.AssetExporters
 
 		public override bool IsContains(Object asset)
 		{
-			if(asset == OcclusionCullingData)
+			if (asset == OcclusionCullingData)
 			{
 				return true;
 			}
@@ -187,7 +187,7 @@ namespace uTinyRipper.AssetExporters
 
 			if (obj1.ClassID.IsSceneSettings())
 			{
-				if(obj2.ClassID.IsSceneSettings())
+				if (obj2.ClassID.IsSceneSettings())
 				{
 					return obj1.ClassID < obj2.ClassID ? -1 : 1;
 				}
@@ -213,11 +213,6 @@ namespace uTinyRipper.AssetExporters
 		{
 			NativeFormatImporter importer = new NativeFormatImporter(asset);
 			ExportAsset(container, importer, asset, path, asset.Name);
-		}
-
-		private void AddComponent(ISerializedFile file, Object comp)
-		{
-			m_cexportIDs.Add(comp, comp.PathID);
 		}
 
 		private bool IsComponent(Object asset)
@@ -262,11 +257,11 @@ namespace uTinyRipper.AssetExporters
 		{
 			get
 			{
-				foreach(Object asset in Components)
+				foreach (Object asset in Components)
 				{
 					yield return asset;
 				}
-				if(OcclusionCullingData != null)
+				if (OcclusionCullingData != null)
 				{
 					yield return OcclusionCullingData;
 				}
@@ -288,6 +283,6 @@ namespace uTinyRipper.AssetExporters
 
 		private readonly Dictionary<Object, long> m_cexportIDs = new Dictionary<Object, long>();
 		private readonly ISerializedFile m_file;
-		private OcclusionCullingSettings m_occlusionCullingSettings;
+		private readonly OcclusionCullingSettings m_occlusionCullingSettings;
 	}
 }

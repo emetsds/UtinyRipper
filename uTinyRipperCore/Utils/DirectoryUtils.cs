@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
 using System.IO;
-using System.Linq;
 
 namespace uTinyRipper
 {
 	public static class DirectoryUtils
 	{
-        private static readonly Dictionary<string, int> _fileIndexCache = new Dictionary<string, int>();
-
 		public static bool Exists(string path)
 		{
 			return Directory.Exists(ToLongPath(path));
@@ -18,7 +14,7 @@ namespace uTinyRipper
 		{
 			return Directory.CreateDirectory(ToLongPath(path));
 		}
-		
+
 		public static void CreateVirtualDirectory(string path)
 		{
 #if !VIRTUAL
@@ -61,7 +57,7 @@ namespace uTinyRipper
 			return ToLongPath(path, false);
 		}
 
-		private static string ToLongPath(string path, bool force)
+		public static string ToLongPath(string path, bool force)
 		{
 			if (path.StartsWith(LongPathPrefix, StringComparison.Ordinal))
 			{
@@ -76,36 +72,7 @@ namespace uTinyRipper
 			return path;
 		}
 
-        public static string GetMaxIndexName(string dirPath, string fileName)
-        {
-            if (!Directory.Exists(dirPath))
-            {
-                return fileName;
-            }
-
-            if (fileName.Length > 245)
-            {
-                fileName = fileName.Substring(0, 245);
-            }
-
-            var longDirPath = ToLongPath(dirPath);
-            var filePathBase = Path.Combine(longDirPath, fileName);
-            if (!_fileIndexCache.TryGetValue(filePathBase, out int counter))
-            {
-                counter = 0;
-            }
-
-            var resultFileName = fileName;
-            while (Directory.EnumerateFiles(longDirPath, resultFileName + ".*", SearchOption.TopDirectoryOnly).Any())
-            {
-                resultFileName = fileName + "_" + counter++;
-            }
-
-            _fileIndexCache[filePathBase] = counter;
-            return resultFileName;
-        }
-
-        public const string LongPathPrefix = @"\\?\";
+		public const string LongPathPrefix = @"\\?\";
 		public const int MaxDirectoryLength = 248;
 	}
 }
