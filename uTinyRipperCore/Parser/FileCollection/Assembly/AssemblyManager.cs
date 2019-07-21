@@ -72,69 +72,67 @@ namespace uTinyRipper.Assembly
 			return m_manager.IsAssemblyLoaded(assembly);
 		}
 
-		public bool IsPresent(string assembly, string name)
+		public bool IsPresent(ScriptIdentifier scriptID)
 		{
 			if (ScriptingBackEnd == ScriptingBackEnd.Unknown)
 			{
 				return false;
 			}
-			return m_manager.IsPresent(assembly, name);
+			if (scriptID.IsDefault)
+			{
+				return false;
+			}
+			return m_manager.IsPresent(scriptID);
 		}
 
-		public bool IsPresent(string assembly, string @namespace, string name)
+		public bool IsValid(ScriptIdentifier scriptID)
 		{
 			if (ScriptingBackEnd == ScriptingBackEnd.Unknown)
 			{
 				return false;
 			}
-			return m_manager.IsPresent(assembly, @namespace, name);
-		}
-
-		public bool IsValid(string assembly, string name)
-		{
-			if (ScriptingBackEnd == ScriptingBackEnd.Unknown)
+			if (scriptID.IsDefault)
 			{
 				return false;
 			}
-			return m_manager.IsValid(assembly, name);
+			return m_manager.IsValid(scriptID);
 		}
 
-		public bool IsValid(string assembly, string @namespace, string name)
+		public SerializableType GetSerializableType(ScriptIdentifier scriptID)
+		{
+			string uniqueName = scriptID.UniqueName;
+			if (m_serializableTypes.TryGetValue(uniqueName, out SerializableType type))
+			{
+				return type;
+			}
+			return m_manager.GetSerializableType(scriptID);
+		}
+
+		public ScriptExportType GetExportType(ScriptExportManager exportManager, ScriptIdentifier scriptID)
 		{
 			if (ScriptingBackEnd == ScriptingBackEnd.Unknown)
 			{
-				return false;
+				throw new Exception("You have to set backend first");
 			}
-			return m_manager.IsValid(assembly, @namespace, name);
+			return m_manager.GetExportType(exportManager, scriptID);
 		}
 
-		public ScriptStructure CreateStructure(string assembly, string name)
-		{
-			return m_manager.CreateStructure(assembly, name);
-		}
-
-		public ScriptStructure CreateStructure(string assembly, string @namespace, string name)
-		{
-			return m_manager.CreateStructure(assembly, @namespace, name);
-		}
-
-		public ScriptExportType CreateExportType(ScriptExportManager exportManager, string assembly, string name)
-		{
-			return m_manager.CreateExportType(exportManager, assembly, name);
-		}
-
-		public ScriptExportType CreateExportType(ScriptExportManager exportManager, string assembly, string @namespace, string name)
-		{
-			return m_manager.CreateExportType(exportManager, assembly, @namespace, name);
-		}
-
-		public ScriptInfo GetScriptInfo(string assembly, string name)
+		public ScriptIdentifier GetScriptID(string assembly, string name)
 		{
 			if (ScriptingBackEnd == ScriptingBackEnd.Unknown)
 			{
 				return default;
 			}
-			return m_manager.GetScriptInfo(assembly, name);
+			return m_manager.GetScriptID(assembly, name);
+		}
+
+		public ScriptIdentifier GetScriptID(string assembly, string @namespace, string name)
+		{
+			if (ScriptingBackEnd == ScriptingBackEnd.Unknown)
+			{
+				return default;
+			}
+			return m_manager.GetScriptID(assembly, @namespace, name);
 		}
 
 		internal void InvokeRequestAssemblyCallback(string assemblyName)
@@ -142,12 +140,12 @@ namespace uTinyRipper.Assembly
 			m_requestAssemblyCallback.Invoke(assemblyName);
 		}
 
-		internal void AddSerializableType(string uniqueName, ScriptType scriptType)
+		internal void AddSerializableType(string uniqueName, SerializableType scriptType)
 		{
 			m_serializableTypes.Add(uniqueName, scriptType);
 		}
 
-		internal bool TryGetSerializableType(string uniqueName, out ScriptType scriptType)
+		internal bool TryGetSerializableType(string uniqueName, out SerializableType scriptType)
 		{
 			return m_serializableTypes.TryGetValue(uniqueName, out scriptType);
 		}
@@ -191,7 +189,6 @@ namespace uTinyRipper.Assembly
 		private event Action<string> m_requestAssemblyCallback;
 
 		private IAssemblyManager m_manager;
-		private Dictionary<string, ScriptType> m_serializableTypes = new Dictionary<string, ScriptType>();
-
+		private Dictionary<string, SerializableType> m_serializableTypes = new Dictionary<string, SerializableType>();
 	}
 }

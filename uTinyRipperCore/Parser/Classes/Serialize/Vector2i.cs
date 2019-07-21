@@ -7,17 +7,12 @@ using uTinyRipper.SerializedFiles;
 
 namespace uTinyRipper.Classes
 {
-	public struct Vector2i : IScriptStructure
+	public struct Vector2i : ISerializableStructure
 	{
 		public Vector2i(int x, int y)
 		{
 			X = x;
 			Y = y;
-		}
-
-		public Vector2i(Vector2i copy) :
-			this(copy.X, copy.Y)
-		{
 		}
 
 		public static bool operator ==(Vector2i left, Vector2i right)
@@ -30,9 +25,9 @@ namespace uTinyRipper.Classes
 			return left.X != right.X || left.Y != right.Y;
 		}
 
-		public IScriptStructure CreateCopy()
+		public ISerializableStructure CreateDuplicate()
 		{
-			return new Vector2i(this);
+			return new Vector2i();
 		}
 
 		public void Read(AssetReader reader)
@@ -89,10 +84,6 @@ namespace uTinyRipper.Classes
 		{
 			return $"[{X}, {Y}]";
 		}
-
-		public IScriptStructure Base => null;
-		public string Namespace => ScriptType.UnityEngineName;
-		public string Name => ScriptType.Vector2IntName;
 
 		public int X { get; private set; }
 		public int Y { get; private set; }

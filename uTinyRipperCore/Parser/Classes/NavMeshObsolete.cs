@@ -7,9 +7,12 @@ using uTinyRipper.YAML;
 
 namespace uTinyRipper.Classes
 {
-	public sealed class NavMesh : NamedObject
+	/// <summary>
+	/// NavMesh previously
+	/// </summary>
+	public sealed class NavMeshObsolete : NamedObject
 	{
-		public NavMesh(AssetInfo assetInfo) :
+		public NavMeshObsolete(AssetInfo assetInfo) :
 			base(assetInfo)
 		{
 		}
@@ -46,7 +49,7 @@ namespace uTinyRipper.Classes
 			return node;
 		}
 
-		public override string ExportName => Path.Combine(AssetsKeyWord, OcclusionCullingSettings.SceneKeyword, ClassID.ToString());
+		public override string ExportPath => Path.Combine(AssetsKeyword, OcclusionCullingSettings.SceneKeyword, ClassID.ToString());
 
 		public IReadOnlyList<byte> MeshData => m_meshData;
 		public IReadOnlyList<HeightmapData> Heightmaps => m_heightmaps;

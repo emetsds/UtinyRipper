@@ -7,7 +7,7 @@ using uTinyRipper.SerializedFiles;
 
 namespace uTinyRipper.Classes
 {
-	public struct ColorRGBA32 : IScriptStructure
+	public struct ColorRGBA32 : ISerializableStructure
 	{
 		public ColorRGBA32(byte r, byte g, byte b, byte a)
 		{
@@ -29,9 +29,9 @@ namespace uTinyRipper.Classes
 			return 2;
 		}
 
-		public IScriptStructure CreateCopy()
+		public ISerializableStructure CreateDuplicate()
 		{
-			return this;
+			return new ColorRGBA32();
 		}
 
 		public void Read(AssetReader reader)
@@ -58,10 +58,6 @@ namespace uTinyRipper.Classes
 		}
 
 		public static ColorRGBA32 White => new ColorRGBA32(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue);
-
-		public IScriptStructure Base => null;
-		public string Namespace => ScriptType.UnityEngineName;
-		public string Name => ScriptType.Color32Name;
 
 		public uint RGBA { get; private set; }
 

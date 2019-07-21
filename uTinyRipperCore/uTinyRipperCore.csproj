@@ -141,6 +141,7 @@
   <ItemGroup>
     <Compile Include="Attributes\EnumNameAttribute.cs" />
     <Compile Include="Parser\Classes\AnimationClip\AnimationClipSettings.cs" />
+    <Compile Include="Parser\Classes\Avatar\Bones\HumanBodyBones.cs" />
     <Compile Include="Parser\Classes\Avatar\HumanBone.cs" />
     <Compile Include="Parser\Classes\Avatar\HumanDescription.cs" />
     <Compile Include="Parser\Classes\Avatar\SkeletonBone.cs" />
@@ -170,7 +171,7 @@
     <Compile Include="Parser\Classes\ParticleSystem\UV\ParticleSystemAnimationRowMode.cs" />
     <Compile Include="Parser\Classes\Serialize\MinMaxAABB.cs" />
     <Compile Include="Parser\Classes\Mesh\VariableBoneCountWeights.cs" />
-    <Compile Include="Parser\Classes\NavMesh.cs" />
+    <Compile Include="Parser\Classes\NavMeshObsolete.cs" />
     <Compile Include="Parser\Classes\NavMeshAgent\NavMeshAgent.cs" />
     <Compile Include="Parser\Classes\NavMeshAgent\ObstacleAvoidanceType.cs" />
     <Compile Include="Parser\Classes\NavMeshObstacle\NavMeshObstacle.cs" />
@@ -198,6 +199,7 @@
     <Compile Include="Parser\FileCollection\Exporter\Exporters\TextAsset\TextAssetExporter.cs" />
     <Compile Include="Parser\FileCollection\Exporter\ExportOptions.cs" />
     <Compile Include="Parser\Format\ArchiveFile\ArchiveFileScheme.cs" />
+    <Compile Include="Parser\IO\Asset\TransferMetaFlags.cs" />
     <Compile Include="Parser\IO\Extensions\EndianReaderExtensions.cs" />
     <Compile Include="Parser\Format\ArchiveFile\ArchiveType.cs" />
     <Compile Include="Parser\Format\ArchiveFile\Parser\ArchiveFileEntry.cs" />
@@ -312,17 +314,15 @@
     <Compile Include="Parser\FileCollection\Assembly\Mono\MonoManager.cs" />
     <Compile Include="Parser\FileCollection\Assembly\AssemblyManager.cs" />
     <Compile Include="Parser\FileCollection\Assembly\Mono\MonoField.cs" />
-    <Compile Include="Parser\FileCollection\Assembly\ScriptInfo.cs" />
+    <Compile Include="Parser\FileCollection\Assembly\ScriptIdentifier.cs" />
     <Compile Include="Parser\FileCollection\Assembly\ScriptingBackEnd.cs" />
-    <Compile Include="Parser\FileCollection\Assembly\Structure\IScriptField.cs" />
-    <Compile Include="Parser\FileCollection\Assembly\Structure\IScriptStructure.cs" />
-    <Compile Include="Parser\FileCollection\Assembly\Structure\ScriptPointer.cs" />
-    <Compile Include="Parser\FileCollection\Assembly\Mono\MonoStructure.cs" />
+    <Compile Include="Parser\FileCollection\Assembly\Serializable\ISerializableStructure.cs" />
+    <Compile Include="Parser\FileCollection\Assembly\Serializable\SerializablePointer.cs" />
     <Compile Include="Parser\FileCollection\Assembly\Mono\MonoType.cs" />
-    <Compile Include="Parser\FileCollection\Assembly\Structure\PrimitiveType.cs" />
-    <Compile Include="Parser\FileCollection\Assembly\Structure\ScriptField.cs" />
-    <Compile Include="Parser\FileCollection\Assembly\Structure\ScriptStructure.cs" />
-    <Compile Include="Parser\FileCollection\Assembly\Structure\ScriptType.cs" />
+    <Compile Include="Parser\FileCollection\Assembly\Serializable\PrimitiveType.cs" />
+    <Compile Include="Parser\FileCollection\Assembly\Serializable\SerializableField.cs" />
+    <Compile Include="Parser\FileCollection\Assembly\Serializable\SerializableStructure.cs" />
+    <Compile Include="Parser\FileCollection\Assembly\Serializable\SerializableType.cs" />
     <Compile Include="Parser\Classes\AnimationClip\AnimationCurveTpl\CurveLoopTypes.cs" />
     <Compile Include="Parser\Classes\AnimationClip\AnimationCurveTpl\RotationOrder.cs" />
     <Compile Include="Parser\Classes\AnimationClip\ChildTrack.cs" />

@@ -10,7 +10,7 @@ namespace uTinyRipper.Classes
 {
 	public sealed class MonoScript : TextAsset
 	{
-		public MonoScript(AssetInfo assetInfo):
+		public MonoScript(AssetInfo assetInfo) :
 			base(assetInfo)
 		{
 		}
@@ -20,7 +20,7 @@ namespace uTinyRipper.Classes
 		/// </summary>
 		public static bool IsReadScript(Version version, TransferInstructionFlags flags)
 		{
-			// unknown version
+			// unknown version (somewhere between 1.5.0 and 2.5.0)
 			return !flags.IsRelease()/* && version.IsGreaterEqual()*/;
 		}
 		/// <summary>
@@ -90,14 +90,14 @@ namespace uTinyRipper.Classes
 			}
 			return version.IsLess(2018, 1, 2);
 		}
-		
+
 		/// <summary>
 		/// Less than 2018.2
 		/// </summary>
 		public static bool IsReadIsEditorScript(Version version)
 		{
 			return version.IsLess(2018, 2);
-		}		
+		}
 
 		/// <summary>
 		/// Less than 5.0.0
@@ -109,7 +109,7 @@ namespace uTinyRipper.Classes
 
 		private static int GetSerializedVersion(Version version)
 		{
-			if(version.IsGreaterEqual(2018, 2))
+			if (version.IsGreaterEqual(2018, 2))
 			{
 				return 5;
 			}
@@ -128,50 +128,35 @@ namespace uTinyRipper.Classes
 
 		public bool IsScriptPresents()
 		{
-			if (IsReadNamespace(File.Version))
-			{
-				return File.AssemblyManager.IsPresent(AssemblyName, Namespace, ClassName);
-			}
-			else
-			{
-				return File.AssemblyManager.IsPresent(AssemblyName, ClassName);
-			}
+			ScriptIdentifier scriptID = IsReadNamespace(File.Version) ?
+				File.AssemblyManager.GetScriptID(AssemblyName, Namespace, ClassName) :
+				File.AssemblyManager.GetScriptID(AssemblyName, ClassName);
+			return File.AssemblyManager.IsPresent(scriptID);
 		}
 
-		public ScriptStructure CreateStructure()
+		public SerializableType GetBehaviourType()
 		{
-			if(IsReadNamespace(File.Version))
+			ScriptIdentifier scriptID = IsReadNamespace(File.Version) ?
+				File.AssemblyManager.GetScriptID(AssemblyName, Namespace, ClassName) :
+				File.AssemblyManager.GetScriptID(AssemblyName, ClassName);
+			if (File.AssemblyManager.IsValid(scriptID))
 			{
-				if (File.AssemblyManager.IsValid(AssemblyName, Namespace, ClassName))
-				{
-					return File.AssemblyManager.CreateStructure(AssemblyName, Namespace, ClassName);
-				}
-			}
-			else
-			{
-				if (File.AssemblyManager.IsValid(AssemblyName, ClassName))
-				{
-					return File.AssemblyManager.CreateStructure(AssemblyName, ClassName);
-				}
+				return File.AssemblyManager.GetSerializableType(scriptID);
 			}
 			return null;
 		}
 
-		public ScriptExportType CreateExportType(ScriptExportManager exportManager)
+		public ScriptExportType GetExportType(ScriptExportManager exportManager)
 		{
-			if(IsReadNamespace(File.Version))
-			{
-				return File.AssemblyManager.CreateExportType(exportManager, AssemblyName, Namespace, ClassName);
-			}
-			else
-			{
-				return File.AssemblyManager.CreateExportType(exportManager, AssemblyName, ClassName);
-			}
+			ScriptIdentifier scriptID = IsReadNamespace(File.Version) ?
+				File.AssemblyManager.GetScriptID(AssemblyName, Namespace, ClassName) :
+				File.AssemblyManager.GetScriptID(AssemblyName, ClassName);
+			return File.AssemblyManager.GetExportType(exportManager, scriptID);
 		}
 
-		public ScriptInfo GetScriptInfo()
+		public ScriptIdentifier GetScriptID()
 		{
-			return File.AssemblyManager.GetScriptInfo(AssemblyName, ClassName);
+			return File.AssemblyManager.GetScriptID(AssemblyName, ClassName);
 		}
 
 		public override void Read(AssetReader reader)
@@ -323,7 +308,7 @@ namespace uTinyRipper.Classes
 			return IsReadAssemblyName(version, flags) ? AssemblyNameOrigin : string.Empty;
 		}
 
-		public override string ExportName => Path.Combine(AssetsKeyWord, "Scripts");
+		public override string ExportPath => Path.Combine(AssetsKeyword, "Scripts");
 		public override string ExportExtension => "cs";
 
 #if UNIVERSAL

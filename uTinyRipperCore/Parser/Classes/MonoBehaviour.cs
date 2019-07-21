@@ -15,9 +15,11 @@ namespace uTinyRipper.Classes
 		{
 		}
 
-		public static bool IsReadEditorHideFlags(Version version, TransferInstructionFlags flags)
+		/// <summary>
+		/// Not Release
+		/// </summary>
+		public static bool IsReadEditorHideFlags(TransferInstructionFlags flags)
 		{
-#warning unknown version
 			return !flags.IsRelease();
 		}
 		/// <summary>
@@ -27,10 +29,12 @@ namespace uTinyRipper.Classes
 		{
 			return !flags.IsRelease() && version.IsGreaterEqual(2019) && version.IsLess(2019, 1, 0, VersionType.Beta, 4);
 		}
+		/// <summary>
+		/// 4.2.0 and greater and Not Release
+		/// </summary>
 		public static bool IsReadEditorClassIdentifier(Version version, TransferInstructionFlags flags)
 		{
-#warning unknown version
-			return !flags.IsRelease();
+			return !flags.IsRelease() && version.IsGreaterEqual(4, 2);
 		}
 
 		public override void Read(AssetReader reader)
@@ -39,7 +43,7 @@ namespace uTinyRipper.Classes
 			base.Read(reader);
 
 #if UNIVERSAL
-			if (IsReadEditorHideFlags(reader.Version, reader.Flags))
+			if (IsReadEditorHideFlags(reader.Flags))
 			{
 				EditorHideFlags = (HideFlags)reader.ReadUInt32();
 			}
@@ -62,9 +66,10 @@ namespace uTinyRipper.Classes
 			MonoScript script = Script.FindAsset(File);
 			if (script != null)
 			{
-				Structure = script.CreateStructure();
-				if(Structure != null)
+				SerializableType behaviourType = script.GetBehaviourType();
+				if (behaviourType != null)
 				{
+					Structure = behaviourType.CreateBehaviourStructure();
 					Structure.Read(reader);
 					return;
 				}
@@ -85,8 +90,8 @@ namespace uTinyRipper.Classes
 			yield return GeneratorAsset.FindAsset(file);
 #endif
 			yield return Script.FindAsset(file);
-			
-			if(Structure != null)
+
+			if (Structure != null)
 			{
 				foreach (Object asset in Structure.FetchDependencies(file, isLog))
 				{
@@ -122,7 +127,7 @@ namespace uTinyRipper.Classes
 		private HideFlags GetEditorHideFlags(Version version, TransferInstructionFlags flags)
 		{
 #if UNIVERSAL
-			if (IsReadEditorHideFlags(version, flags))
+			if (IsReadEditorHideFlags(flags))
 			{
 				return EditorHideFlags;
 			}
@@ -150,7 +155,7 @@ namespace uTinyRipper.Classes
 			return string.Empty;
 		}
 
-		public override string ExportName => Path.Combine(AssetsKeyWord, "ScriptableObject");
+		public override string ExportPath => Path.Combine(AssetsKeyword, "ScriptableObject");
 		public override string ExportExtension => AssetExtension;
 
 		/// <summary>
@@ -164,7 +169,7 @@ namespace uTinyRipper.Classes
 		public HideFlags EditorHideFlags { get; private set; }
 #endif
 		public string Name { get; private set; }
-		public ScriptStructure Structure { get; private set; }
+		public SerializableStructure Structure { get; private set; }
 #if UNIVERSAL
 		public string EditorClassIdentifier { get; private set; }
 #endif

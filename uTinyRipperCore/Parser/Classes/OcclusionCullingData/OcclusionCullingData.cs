@@ -112,7 +112,14 @@ namespace uTinyRipper.Classes
 
 			foreach(OcclusionCullingSettings cullingSetting in cullingSettings)
 			{
-				OcclusionScene scene = Scenes.First(t => t.Scene == cullingSetting.SceneGUID);
+				int sceneIndex = Scenes.IndexOf(t => t.Scene == cullingSetting.SceneGUID);
+				if (sceneIndex == -1)
+				{
+					Logger.Log(LogType.Error, LogCategory.Export, $"Unable to find scene data with GUID {cullingSetting.SceneGUID} in {ValidName}");
+					continue;
+				}
+
+				OcclusionScene scene = Scenes[sceneIndex];
 				if (scene.SizeRenderers != cullingSetting.StaticRenderers.Count)
 				{
 					throw new Exception($"Scene renderer count {scene.SizeRenderers} doesn't match with given {cullingSetting.StaticRenderers.Count}");
@@ -149,7 +156,7 @@ namespace uTinyRipper.Classes
 			return soId;
 		}
 
-		public override string ExportName => Path.Combine(AssetsKeyWord, OcclusionCullingSettings.SceneKeyword, ClassID.ToString());
+		public override string ExportPath => Path.Combine(AssetsKeyword, OcclusionCullingSettings.SceneKeyword, ClassID.ToString());
 
 		public IReadOnlyList<byte> PVSData => m_PVSData;
 		public IReadOnlyList<OcclusionScene> Scenes => m_scenes;

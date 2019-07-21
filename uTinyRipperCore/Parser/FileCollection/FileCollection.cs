@@ -64,6 +64,10 @@ namespace uTinyRipper
 			{
 				return WebFile.ReadScheme(stream, offset, size, filePath, fileName);
 			}
+			if (ResourceFile.IsDefaultResourceFile(fileName))
+			{
+				return ResourceFile.ReadScheme(stream, offset, size, filePath, fileName);
+			}
 			if (SerializedFile.IsSerializedFile(stream, offset, size))
 			{
 				return SerializedFile.ReadScheme(stream, offset, size, filePath, fileName);
@@ -217,7 +221,7 @@ namespace uTinyRipper
 			AssemblyManager.Dispose();
 			foreach (ResourceFile res in m_resources.Values)
 			{
-				res.Dispose();
+				res?.Dispose();
 			}
 		}
 

@@ -7,7 +7,7 @@ using uTinyRipper.SerializedFiles;
 
 namespace uTinyRipper.Classes
 {
-	public struct Rectf : IScriptStructure
+	public struct Rectf : ISerializableStructure
 	{
 		private static int GetSerializedVersion(Version version)
 		{
@@ -25,11 +25,6 @@ namespace uTinyRipper.Classes
 
 		public Rectf(Vector2f positon, Vector2f size):
 			this(positon.X, positon.Y, size.X, size.Y)
-		{
-		}
-
-		public Rectf(Rectf copy):
-			this(copy.X, copy.Y, copy.Width, copy.Height)
 		{
 		}
 
@@ -95,9 +90,9 @@ namespace uTinyRipper.Classes
 			return result;
 		}
 
-		public IScriptStructure CreateCopy()
+		public ISerializableStructure CreateDuplicate()
 		{
-			return new Rectf(this);
+			return new Rectf();
 		}
 
 		public void Read(AssetReader reader)
@@ -169,10 +164,6 @@ namespace uTinyRipper.Classes
 		}
 
 		public Vector2f Center => new Vector2f(X + Width / 2.0f, Y + Height / 2.0f);
-
-		public IScriptStructure Base => null;
-		public string Namespace => ScriptType.UnityEngineName;
-		public string Name => ScriptType.RectName;
 
 		public Vector2f Position => new Vector2f(X, Y);
 		public Vector2f Size => new Vector2f(Width, Height);

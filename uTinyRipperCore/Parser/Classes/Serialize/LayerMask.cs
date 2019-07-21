@@ -6,22 +6,17 @@ using uTinyRipper.SerializedFiles;
 
 namespace uTinyRipper.Classes
 {
-	public struct LayerMask : IScriptStructure
+	public struct LayerMask : ISerializableStructure
 	{
-		public LayerMask(LayerMask copy)
-		{
-			Bits = copy.Bits;
-		}
-
 		private static int GetSerializedVersion(Version version)
 		{
 			// TODO:
 			return 2;
 		}
 
-		public IScriptStructure CreateCopy()
+		public ISerializableStructure CreateDuplicate()
 		{
-			return new LayerMask(this);
+			return new LayerMask();
 		}
 
 		public void Read(AssetReader reader)
@@ -41,10 +36,6 @@ namespace uTinyRipper.Classes
 		{
 			yield break;
 		}
-
-		public IScriptStructure Base => null;
-		public string Namespace => ScriptType.UnityEngineName;
-		public string Name => ScriptType.LayerMaskName;
 
 		public uint Bits { get; private set; }
 	}

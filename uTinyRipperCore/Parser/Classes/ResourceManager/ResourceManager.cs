@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
 using uTinyRipper.AssetExporters;
 using uTinyRipper.Classes.ResourceManagers;
 using uTinyRipper.YAML;
@@ -66,9 +67,26 @@ namespace uTinyRipper.Classes
 			return node;
 		}
 
+		public bool TryGetResourcePathFromAsset(Object asset, out string resourcePath)
+		{
+			foreach (KeyValuePair<string, PPtr<Object>> containerEntry in m_container)
+			{
+				if (containerEntry.Value.IsAsset(File, asset))
+				{
+					resourcePath = Path.Combine(AssetsKeyword, ResourceKeyword, containerEntry.Key);
+					return true;
+				}
+			}
+
+			resourcePath = string.Empty;
+			return false;
+		}
+
 		public IReadOnlyList<KeyValuePair<string, PPtr<Object>>> Container => m_container;
 		public ILookup<string, PPtr<Object>> ContainerMap => Container.ToLookup(t => t.Key, t => t.Value);
 		public IReadOnlyList<ResourceManagerDependency> DependentAssets => m_dependentAssets;
+
+		public const string ResourceKeyword = "Resources";
 
 		public const string ContainerName = "m_Container";
 		public const string DependentAssetsName = "m_DependentAssets";

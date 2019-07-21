@@ -74,7 +74,7 @@ namespace uTinyRipper.AssetExporters
 				return false;
 			}
 
-			string scriptFolder = m_export[0].ExportName;
+			string scriptFolder = m_export[0].ExportPath;
 			string scriptPath = Path.Combine(dirPath, scriptFolder);
 
 			AssetExporter.Export(container, m_export, scriptPath, OnScriptExported);
@@ -108,8 +108,8 @@ namespace uTinyRipper.AssetExporters
 				}
 				else
 				{
-					ScriptInfo scriptInfo = script.GetScriptInfo();
-					if (scriptInfo != default)
+					ScriptIdentifier scriptInfo = script.GetScriptID();
+					if (!scriptInfo.IsDefault)
 					{
 						int fileID = Compute(scriptInfo.Namespace, scriptInfo.Name);
 						return new ExportPointer(fileID, UnityEngineGUID, AssetExporter.ToExportType(asset));
@@ -154,7 +154,7 @@ namespace uTinyRipper.AssetExporters
 		public override string Name => nameof(ScriptExportCollection);
 
 		private static readonly EngineGUID UnityEngineGUID = new EngineGUID(0xE09C671C, 0x825f0804, 0x44d8491a, 0xf70555f1);
-		private static readonly Regex s_unityEngine = new Regex(@"^UnityEngine(\.[0-9a-zA-Z]+)*(\.dll)?$", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+		private static readonly Regex s_unityEngine = new Regex(@"^UnityEngine(\.[0-9a-zA-Z]+)*(\.dll)?$", RegexOptions.Compiled);
 
 		private readonly List<MonoScript> m_export = new List<MonoScript>();
 		private readonly HashSet<MonoScript> m_unique = new HashSet<MonoScript>();

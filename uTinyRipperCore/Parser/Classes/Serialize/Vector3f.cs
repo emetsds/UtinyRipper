@@ -9,7 +9,7 @@ using uTinyRipper.SerializedFiles;
 
 namespace uTinyRipper.Classes
 {
-	public struct Vector3f : IScriptStructure
+	public struct Vector3f : ISerializableStructure
 	{
 		public Vector3f(float x, float y, float z)
 		{
@@ -18,14 +18,9 @@ namespace uTinyRipper.Classes
 			Z = z;
 		}
 
-		public Vector3f(Vector3f copy) :
-			this(copy.X, copy.Y, copy.Z)
+		public ISerializableStructure CreateDuplicate()
 		{
-		}
-
-		public IScriptStructure CreateCopy()
-		{
-			return new Vector3f(this);
+			return new Vector3f();
 		}
 
 		public void Read(AssetReader reader)
@@ -100,10 +95,6 @@ namespace uTinyRipper.Classes
 		}
 
 		public static Vector3f One => new Vector3f(1.0f, 1.0f, 1.0f);
-
-		public IScriptStructure Base => null;
-		public string Namespace => ScriptType.UnityEngineName;
-		public string Name => ScriptType.Vector3Name;
 
 		public static Vector3f DefaultWeight => new Vector3f(1.0f / 3.0f, 1.0f / 3.0f, 1.0f / 3.0f);
 

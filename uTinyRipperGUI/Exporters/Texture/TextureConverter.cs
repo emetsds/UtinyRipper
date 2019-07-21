@@ -65,7 +65,7 @@ namespace uTinyRipperGUI.Exporters
 						throw new Exception(texture.TextureFormat.ToString());
 
 				}
-				bitmap.Bitmap.RotateFlip(RotateFlipType.RotateNoneFlipY);
+				bitmap.FlipY();
 				return bitmap;
 			}
 			catch
@@ -128,7 +128,7 @@ namespace uTinyRipperGUI.Exporters
 						throw new Exception(texture.TextureFormat.ToString());
 
 				}
-				bitmap.Bitmap.RotateFlip(RotateFlipType.RotateNoneFlipY);
+				bitmap.FlipY();
 				return bitmap;
 			}
 			catch
@@ -171,7 +171,7 @@ namespace uTinyRipperGUI.Exporters
 						throw new Exception(texture.TextureFormat.ToString());
 
 				}
-				bitmap.Bitmap.RotateFlip(RotateFlipType.RotateNoneFlipY);
+				bitmap.FlipY();
 				return bitmap;
 			}
 			catch
@@ -213,7 +213,7 @@ namespace uTinyRipperGUI.Exporters
 			try
 			{
 				PvrtcDecoder.DecompressPVRTC(data, width, height, bitmap.Bits, bitCount == 2);
-				bitmap.Bitmap.RotateFlip(RotateFlipType.RotateNoneFlipY);
+				bitmap.FlipY();
 				return bitmap;
 			}
 			catch
@@ -232,6 +232,7 @@ namespace uTinyRipperGUI.Exporters
 			try
 			{
 				AstcDecoder.DecodeASTC(data, width, height, blockSize, blockSize, bitmap.Bits);
+				bitmap.FlipY();
 				return bitmap;
 			}
 			catch
@@ -250,7 +251,7 @@ namespace uTinyRipperGUI.Exporters
 				int len = bitmap.Stride * bitmap.Height;
 				if (Ponvert(data, bitmap.BitsPtr, texture.Width, texture.Height, data.Length, (int)ToQFormat(texture.TextureFormat), len, fixAlpha))
 				{
-					bitmap.Bitmap.RotateFlip(RotateFlipType.RotateNoneFlipY);
+					bitmap.FlipY();
 					return bitmap;
 				}
 				else
@@ -273,13 +274,35 @@ namespace uTinyRipperGUI.Exporters
 			try
 			{
 				texgenpackdecode((int)ToTexgenpackTexturetype(texture.TextureFormat), data, texture.Width, texture.Height, bitmap.BitsPtr, fixAlpha);
-				bitmap.Bitmap.RotateFlip(RotateFlipType.RotateNoneFlipY);
+				bitmap.FlipY();
 				return bitmap;
 			}
 			catch
 			{
 				bitmap.Dispose();
 				throw;
+			}
+		}
+
+		public unsafe static void UnpackNormal(IntPtr inputOutput, int length)
+		{
+			byte* dataPtr = (byte*)inputOutput;
+			int count = length / 4;
+			for (int i = 0; i < count; i++, dataPtr += 4)
+			{
+				byte r = dataPtr[3];
+				byte g = dataPtr[1];
+				byte a = dataPtr[2];
+				dataPtr[2] = r;
+				dataPtr[3] = a;
+
+				const double MagnitudeSqr = 255.0 * 255.0;
+				double vr = r * 2.0 - 255.0;
+				double vg = g * 2.0 - 255.0;
+				double hypotenuseSqr = vr * vr + vg * vg;
+				hypotenuseSqr = hypotenuseSqr > MagnitudeSqr ? MagnitudeSqr : hypotenuseSqr;
+				double b = (Math.Sqrt(MagnitudeSqr - hypotenuseSqr) + 255.0) / 2.0;
+				dataPtr[0] = (byte)b;
 			}
 		}
 

@@ -9,7 +9,7 @@ using uTinyRipper.SerializedFiles;
 
 namespace uTinyRipper.Classes
 {
-	public struct Vector2f : IScriptStructure
+	public struct Vector2f : ISerializableStructure
 	{
 		public Vector2f(float value) :
 			this(value, value)
@@ -20,11 +20,6 @@ namespace uTinyRipper.Classes
 		{
 			X = x;
 			Y = y;
-		}
-
-		public Vector2f(Vector2f copy):
-			this(copy.X, copy.Y)
-		{
 		}
 
 		public static Vector2f operator -(Vector2f left)
@@ -82,9 +77,9 @@ namespace uTinyRipper.Classes
 			return (float)(360.0 * angle / (2.0 * Math.PI));
 		}
 
-		public IScriptStructure CreateCopy()
+		public ISerializableStructure CreateDuplicate()
 		{
-			return new Vector2f(this);
+			return new Vector2f();
 		}
 
 		public void Read(AssetReader reader)
@@ -156,10 +151,6 @@ namespace uTinyRipper.Classes
 		}
 
 		public static Vector2f One { get; } = new Vector2f(1.0f, 1.0f);
-
-		public IScriptStructure Base => null;
-		public string Namespace => ScriptType.UnityEngineName;
-		public string Name => ScriptType.Vector2Name;
 
 		public float X { get; private set; }
 		public float Y { get; private set; }

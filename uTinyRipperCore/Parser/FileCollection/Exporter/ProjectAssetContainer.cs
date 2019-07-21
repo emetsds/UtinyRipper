@@ -43,6 +43,10 @@ namespace uTinyRipper.AssetExporters
 					case ClassIDType.TagManager:
 						m_tagManager = (TagManager)asset;
 						break;
+                        
+					case ClassIDType.ResourceManager:
+						m_resourceManager = (ResourceManager)asset;
+						break;
 				}
 			}
 
@@ -60,6 +64,28 @@ namespace uTinyRipper.AssetExporters
 				}
 			}
 			m_scenes = scenes.ToArray();
+		}
+
+#warning TODO: get rid of IEnumerable. pass only main asset (issues: prefab, texture with sprites, animatorController)
+		public bool TryGetResourcePathFromAssets(IEnumerable<Object> assets, out Object selectedAsset, out string resourcePath)
+		{
+			selectedAsset = null;
+			resourcePath = string.Empty;
+			if (m_resourceManager == null)
+			{
+				return false;
+			}
+
+			foreach (Object asset in assets)
+			{
+				if (m_resourceManager.TryGetResourcePathFromAsset(asset, out resourcePath))
+				{
+					selectedAsset = asset;
+					return true;
+				}
+			}
+
+			return false;
 		}
 
 		public Object FindAsset(int fileIndex, long pathID)
@@ -198,11 +224,14 @@ namespace uTinyRipper.AssetExporters
 			{
 				return UntaggedTag;
 			}
-			if(m_tagManager.Tags.Count == 0)
+
+			// Unity doesn't verify tagID on export?
+			int tagIndex = tagID - 20000;
+			if (tagIndex >= m_tagManager.Tags.Count)
 			{
 				return $"unknown_{tagID}";
 			}
-			return m_tagManager.Tags[tagID - 20000];
+			return m_tagManager.Tags[tagIndex];
 		}
 
 		public IExportCollection CurrentCollection { get; set; }
@@ -220,6 +249,7 @@ namespace uTinyRipper.AssetExporters
 
 		private readonly BuildSettings m_buildSettings;
 		private readonly TagManager m_tagManager;
+		private readonly ResourceManager m_resourceManager;
 		private readonly SceneExportCollection[] m_scenes;
 		private readonly TransferInstructionFlags m_exportFlags;
 	}
